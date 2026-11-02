@@ -42,4 +42,4 @@ Personlige noter, der ikke skal i git, kan ligge i `CLAUDE.local.md` (står i `.
 
 ## Hvor er vi?
 
-Se "Faser" i `docs/plan.md`. Nuværende fase: **0. Fundament** (ikke startet).
+Se "Faser" i `docs/plan.md`. Nuværende fase: **0. Fundament** (i gang).

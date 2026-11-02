@@ -66,6 +66,7 @@ Seks skærme: Tilbud, Købsliste, Feed, Plan, Gruppe, Indstillinger. Plus login,
 | Område | Valg | Hvorfor |
 | --- | --- | --- |
 | Backend | Node 24 LTS + TypeScript + Fastify | LTS til 2028. Lavt RAM-forbrug (1 GB droplet), ét sprog med frontend, gode AI-SDK'er |
+| TypeScript i API | Node kører `.ts` direkte (type stripping), intet build-trin | Færre værktøjer. Kræver `.ts` i imports og ingen `enum` (`erasableSyntaxOnly`) |
 | ORM | Drizzle | Tæt på SQL, migrations, nemt at bruge tsvector og pg_trgm |
 | Database | PostgreSQL 17 i Docker | Gratis, alt ét sted, nemt at flytte til managed senere |
 | Frontend | React + Vite + TanStack Query + TanStack Router + Tailwind + shadcn/ui | Kendt stack, typesikre routes, simpel state |

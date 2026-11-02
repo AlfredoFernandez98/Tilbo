@@ -6,7 +6,7 @@ Fælles købsliste og tilbudssøgning for familien.
 - Søg i ugens tilbud fra danske butikker
 - Se hvor varerne på listen er billigst
 
-Status: planlægning. Se [docs/plan.md](docs/plan.md).
+Status: fase 0 (fundament) i gang. Se [docs/plan.md](docs/plan.md).
 
 ## Stack
 
@@ -14,14 +14,19 @@ Node 24, TypeScript, Fastify, Drizzle, PostgreSQL, React, Vite, Tailwind, shadcn
 
 ## Kør lokalt
 
-Kommer i fase 0. Planen er:
+Kræver Node 24 (se `.nvmrc`, fx via `fnm`) og pnpm via `corepack enable pnpm`.
 
 ```bash
 pnpm install
-cp .env.example .env
-docker compose up -d db
 pnpm dev
 ```
+
+- Web: http://localhost:5173
+- API: http://localhost:3000/api/health
+
+Tjek alt: `pnpm typecheck && pnpm test && pnpm build`.
+
+Database (`docker compose up -d db`) kommer senere i fase 0.
 
 ## Mapper
 
