@@ -10,7 +10,7 @@ Status: planlægning. Se [docs/plan.md](docs/plan.md).
 
 ## Stack
 
-Node 22, TypeScript, Fastify, Drizzle, PostgreSQL, React, Vite, Tailwind, shadcn/ui. pnpm monorepo. Docker Compose og Caddy på DigitalOcean.
+Node 24, TypeScript, Fastify, Drizzle, PostgreSQL, React, Vite, Tailwind, shadcn/ui. pnpm monorepo. Docker Compose og Caddy på DigitalOcean.
 
 ## Kør lokalt
 

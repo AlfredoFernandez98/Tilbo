@@ -21,7 +21,7 @@ Hele planen ligger i `docs/plan.md`. Den er sandheden. Hvis noget i koden og pla
 
 ## Stack (besluttet)
 
-- Backend: Node 22, TypeScript, Fastify, Drizzle, PostgreSQL 17
+- Backend: Node 24, TypeScript, Fastify, Drizzle, PostgreSQL 17
 - Frontend: React, Vite, TanStack Query, TanStack Router, Tailwind, shadcn/ui, Zustand
 - Monorepo: pnpm workspaces (`apps/api`, `apps/web`, `packages/shared`)
 - Jobs: node-cron i API-processen
