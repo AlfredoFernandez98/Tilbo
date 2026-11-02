@@ -1,0 +1,31 @@
+# Afhængigheder og build
+node_modules/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+.vite/
+
+# Hemmeligheder
+.env
+.env.*
+!.env.example
+
+# Lokale data
+pgdata/
+backups/
+*.dump
+*.sql.gz
+
+# Personlige Claude-filer (delte regler ligger i .claude/rules og .claude/settings.json)
+CLAUDE.local.md
+.claude/settings.local.json
+
+# Logs og OS
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
