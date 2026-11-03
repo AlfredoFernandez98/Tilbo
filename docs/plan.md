@@ -1,6 +1,6 @@
 # Tilbo: plan
 
-Sidst opdateret: 2. november 2026
+Sidst opdateret: 3. november 2026
 
 Tilbo er en fælles købsliste og tilbudssøgning. Den starter som en app til familien, men er bygget så flere grupper kan komme til, og så den kan udgives som rigtig app senere.
 
@@ -9,7 +9,7 @@ Tilbo er en fælles købsliste og tilbudssøgning. Den starter som en app til fa
 ### Brugere og grupper
 
 - Hver bruger har sin egen profil: navn, e-mail, adgangskode, postnummer
-- En gruppe har 1-10 medlemmer
+- En gruppe har 1-5 medlemmer. Invitationer stoppes, når gruppen er fuld
 - En bruger kan være med i maks 5 grupper
 - Grupper er helt lukkede: er du i gruppe 1, kan du ikke se noget fra gruppe 2 (lister, noter, søgninger, medlemmer, feed)
 - Man skifter mellem sine grupper i appen og ser kun den valgte gruppe
@@ -161,7 +161,7 @@ Princip: feature-mapper, ikke lag. Alt om grupper ligger i `modules/groups/`.
 | Tabel | Vigtige kolonner | Bemærk |
 | --- | --- | --- |
 | `users` | id, name, email (unik), password_hash, postal_code, created_at | |
-| `groups` | id, name, invite_code (unik), postal_code, created_by, created_at | Maks 10 medlemmer |
+| `groups` | id, name, invite_code (unik), postal_code, created_by, created_at | Maks 5 medlemmer |
 | `group_members` | group_id, user_id, role (`admin`/`member`), joined_at | PK (group_id, user_id). Maks 5 grupper pr. bruger. Ingen to grupper med samme navn for samme bruger |
 | `invites` | id, group_id, email, token, expires_at, accepted_at | expires_at = nu + 7 dage |
 | `stores` | id, name, chain, source_dealer_id | |
@@ -226,7 +226,7 @@ Fundet 2. november 2026. Anbefalinger, ikke beslutninger endnu. Når et punkt er
 | 5 | Auth er ikke beskrevet | JWT i httpOnly-cookie (ikke localStorage), adgangskoder med argon2, nulstil adgangskode via e-mail | 1 |
 | 6 | Ingen e-mail-udbyder valgt (invitation, nulstilling) | En med gratis niveau, fx Resend eller Brevo | 1 |
 | 7 | Hvad sker der når admin eller sidste medlem forlader gruppen | Næste medlem bliver admin. Går det sidste medlem, slettes gruppen | 1 |
-| 8 | Grænserne (10 medlemmer, 5 grupper, unikt navn) kan omgås af samtidige kald | Tjek i én transaktion med lås. Navne sammenlignes uden forskel på store og små bogstaver | 1 |
+| 8 | Grænserne (5 medlemmer, 5 grupper, unikt navn) kan omgås af samtidige kald | Tjek i én transaktion med lås. Navne sammenlignes uden forskel på store og små bogstaver | 1 |
 | 9 | Hvordan ser de andre ændringer på listen | TanStack Query med `refetchInterval` (ca. 10 sek). Ingen websockets i version 1 | 2 |
 | 10 | Afkrydsning ved en fejl kan ikke fortrydes | "Fortryd" i et par sekunder efter afkrydsning | 2 |
 | 11 | `pg_dump` på samme droplet er ikke en rigtig backup | Kopiér også dumpet væk fra serveren (DigitalOcean Spaces eller egen maskine) | 0 |
@@ -236,3 +236,32 @@ Fundet 2. november 2026. Anbefalinger, ikke beslutninger endnu. Når et punkt er
 | 15 | 1 GB RAM til Postgres, API og Caddy ved siden af det der kører i dag | Mål forbruget efter fase 0 før vi bygger videre | 0 |
 | 16 | Ingen licens i et offentligt repo betyder "alle rettigheder forbeholdt" | **Besluttet 2. november 2026:** ingen licens. Se afsnit 2 | 0 |
 | 17 | Git-mailen i commits er offentlig | Brug GitHubs noreply-adresse i dette repo før første commit | 0 |
+
+## 10. Huskeliste
+
+Oprettet 3. november 2026. Ting der skal med, men ikke er planlagt i en fase endnu. Når et punkt er besluttet, flyttes det ind i det afsnit det hører til.
+
+### Butikker med flest tilbud
+
+- Filtrer og sorter butikker efter hvor mange varer fra listen, der er på tilbud
+- Fx "Netto: 7 af 12 varer på tilbud", "Føtex: 4 af 12"
+- Butikken med flest tilbud vises øverst
+
+### Samlet pris pr. butik
+
+- Vis samlet total, hvis man køber hele listen i én butik
+- Fx "Alt i Netto: 214 kr.", "Alt i Rema: 238 kr."
+- Vis også den billigste blanding af butikker, og hvor meget man sparer
+- Koden regner totalerne, ikke AI'en
+
+### Normalpriser (ikke kun tilbud)
+
+- Hent også almindelige priser, fx banan, selvom den ikke er på tilbud
+- Så bliver totalen pr. butik rigtig, også for varer uden tilbud
+- Åbent: find en kilde. Tjek-API'et har kun tilbud. Skal undersøges (webshops som Bilka ToGo, Nemlig, Rema-appen, eller Tilbudsdata)
+
+### Historik
+
+- Prishistorik: hvad har varen kostet før, og er tilbuddet reelt billigt
+- Købshistorik: hvad har gruppen købt, hvornår og hvor
+- Åbent: hvilken af dem er vigtigst, eller begge?
