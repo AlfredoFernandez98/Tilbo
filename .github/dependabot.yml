@@ -7,6 +7,10 @@ updates:
       interval: weekly
     commit-message:
       prefix: chore
+    ignore:
+      # Project runs Node 24, so types must stay on 24.x
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
   # actions i .github/workflows
   - package-ecosystem: github-actions
     directory: /
