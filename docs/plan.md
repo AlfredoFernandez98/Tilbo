@@ -19,7 +19,7 @@ Tilbo er en fælles købsliste og tilbudssøgning. Den starter som en app til fa
 - En bruger kan ikke være med i to grupper med samme navn. Andre brugere må gerne have en gruppe med samme navn, da grupperne ikke kan se hinanden
 - Hver gruppe har teknisk et unikt id
 - Hver gruppe har ét postnummer, der bestemmer hvilke butikker og tilbud gruppen ser
-- Invitation via et link med token, udløber efter 7 dage. E-mail kommer senere (hul 6)
+- Invitation via et delt link, som flere kan bruge, udløber efter 7 dage. E-mail kommer senere (hul 6)
 - Ordet "Gruppe" bruges i UI'et indtil videre. Det ligger ét sted i koden, så det kan skiftes (fx til "Kurv")
 
 ### Fælles købsliste (hjertet i appen)
@@ -166,7 +166,7 @@ Princip: feature-mapper, ikke lag. Alt om grupper ligger i `modules/groups/`.
 | `users` | id, name, email (unik), password_hash, created_at | Intet postnummer (hul 3) |
 | `groups` | id, name, postal_code, created_by, created_at | Maks 10 medlemmer. Invitationskoden ligger i `invites` (hul 4) |
 | `group_members` | group_id, user_id, role (`admin`/`member`), joined_at | PK (group_id, user_id). Maks 5 grupper pr. bruger. Ingen to grupper med samme navn for samme bruger |
-| `invites` | id, group_id, email (valgfri), token, expires_at, accepted_at | expires_at = nu + 7 dage. Version 1 kun link, ingen e-mail |
+| `invites` | id, group_id, token_hash, created_by, expires_at | Delt link: kan bruges af flere, indtil det udløber (7 dage) eller gruppen har 10 medlemmer. Kun sha256-hash af tokenet gemmes. Besluttet 14. november 2026 |
 | `stores` | id, name, chain, source_dealer_id | |
 | `offers` | id, source, source_offer_id, name, name_normalized, price, normal_price, unit, quantity, store_id, valid_from, valid_to, image_url, category, search_vector, imported_at | Unik (source, source_offer_id). GIN på search_vector og name_normalized |
 | `shopping_lists` | id, group_id, name | Én pr. gruppe |
