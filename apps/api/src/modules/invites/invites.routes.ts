@@ -22,13 +22,17 @@ export async function invitesRoutes(app: FastifyInstance) {
   // Only admins can invite. Non-members get 404, so they cannot tell whether the group exists.
   app.post("/api/groups/:groupId/invites", async (req, reply) => {
     const { groupId } = parse(groupIdParamsSchema, req.params);
-    const role = await getRole(app.db, groupId, req.user.sub);
-    if (!role) throw new HttpError(404, "group_not_found");
-    if (role !== "admin") throw new HttpError(403, "admin_only");
-
     const token = randomBytes(32).toString("base64url");
     const expiresAt = new Date(Date.now() + INVITE_DAYS * 24 * 60 * 60 * 1000);
-    await app.db.insert(invites).values({ groupId, tokenHash: sha256(token), createdBy: req.user.sub, expiresAt });
+
+    await app.db.transaction(async (tx) => {
+      // Same group lock as leave, so the admin cannot leave (or the group vanish) between check and insert.
+      const [locked] = await tx.select({ id: groups.id }).from(groups).where(eq(groups.id, groupId)).for("update");
+      const role = locked && (await getRole(tx, groupId, req.user.sub));
+      if (!role) throw new HttpError(404, "group_not_found");
+      if (role !== "admin") throw new HttpError(403, "admin_only");
+      await tx.insert(invites).values({ groupId, tokenHash: sha256(token), createdBy: req.user.sub, expiresAt });
+    });
 
     const res: InviteResponse = { token, expiresAt: expiresAt.toISOString() };
     return reply.code(201).send(res);
