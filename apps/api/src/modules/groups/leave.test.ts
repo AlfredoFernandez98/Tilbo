@@ -26,7 +26,8 @@ afterEach(async () => {
 async function join(email: string) {
   const cookies = await signupAs(app, email);
   const { token } = (await app.inject({ method: "POST", url: `/api/groups/${groupId}/invites`, cookies: anna })).json();
-  await app.inject({ method: "POST", url: `/api/invites/${token}/accept`, cookies });
+  const res = await app.inject({ method: "POST", url: "/api/invites/accept", cookies, payload: { token } });
+  expect(res.statusCode).toBe(200);
   return cookies;
 }
 const leave = (cookies: Cookies, id = groupId) =>
