@@ -1,52 +1,45 @@
 # CLAUDE.md
 
-Context for Claude Code. Read this and `docs/plan.md` before doing anything.
+Kontekst til Claude Code. Læs den her og `docs/plan.md` før du gør noget.
 
-## The project
+## Projektet
 
-Tilbo is a shared shopping list and offer search. First for my family, maybe published as an app later. A private project I build myself.
+Tilbo er en fælles købsliste og tilbudssøgning. Først til min familie, senere måske udgivet som app. Privat projekt, jeg bygger det selv.
 
-The whole plan is in `docs/plan.md`. It is the source of truth. If the code and the plan disagree, ask me.
+Hele planen ligger i `docs/plan.md`. Den er sandheden. Hvis noget i koden og planen ikke passer sammen, så spørg mig.
 
-## How to help me
+## Sådan skal du hjælpe mig
 
-- Guide me step by step. One step at a time, and wait until I say it works before moving on
-- Briefly explain why, not only what. I am learning Node.js as I go (I know Java best)
-- Write short and simple. No long explanations
-- Use bullets when there are several things
-- Tell me if something I ask for goes against the plan
-- When we decide something new, update `docs/plan.md` and, if relevant, add an ADR in `docs/adr/`
-- When a phase is done, write it in `docs/plan.md`
-- Never claim something works without showing output from a command or test
+- Guide mig step by step. Ét trin ad gangen, og vent på at jeg siger det virker, før vi går videre
+- Forklar kort hvorfor, ikke kun hvad. Jeg lærer Node.js undervejs (jeg kender Java bedst)
+- Skriv på dansk, kort og enkelt. Ingen lange forklaringer
+- Brug bullets når der er flere ting
+- Sig det, hvis noget jeg beder om går imod planen
+- Når vi beslutter noget nyt, så opdater `docs/plan.md` og evt. en ADR i `docs/adr/`
+- Når en fase er færdig, så skriv det i `docs/plan.md`
+- Påstå aldrig at noget virker uden at vise output fra en kommando eller test
 
-## Language
-
-- Everything in git and on GitHub is English: code, comments, test names, README, docs, rules, ADRs, commits and PRs
-- Text that users see in the app (UI) is Danish, also when it lives in code (e.g. `labels.ts`)
-- Chat with me is Danish
-- For now `docs/plan.md` is still in Danish. It will be translated in a separate PR
-
-## Stack (decided)
+## Stack (besluttet)
 
 - Backend: Node 24, TypeScript, Fastify, Drizzle, PostgreSQL 17
 - Frontend: React, Vite, TanStack Query, TanStack Router, Tailwind, shadcn/ui, Zustand
 - Monorepo: pnpm workspaces (`apps/api`, `apps/web`, `packages/shared`)
-- Jobs: node-cron in the API process
-- Hosting: Docker Compose on DigitalOcean (Frankfurt, 1 GB RAM), Caddy, `tilbo.alfredofernandez.dk`
-- Deploy: GitHub Actions builds to GHCR and deploys over SSH
+- Jobs: node-cron i API-processen
+- Hosting: Docker Compose på DigitalOcean (Frankfurt, 1 GB RAM), Caddy, `tilbo.alfredofernandez.dk`
+- Deploy: GitHub Actions bygger til GHCR og deployer via SSH
 
-Do not use Java, Next.js, NestJS, Prisma, Redis or Coolify/Dokploy without asking first.
+Brug ikke Java, Next.js, NestJS, Prisma, Redis eller Coolify/Dokploy uden at spørge først.
 
-## Rules for the rest of the repo
+## Regler i resten af repoet
 
-In `.claude/rules/`. Claude Code loads them by itself:
+Ligger i `.claude/rules/`. Claude Code indlæser dem selv:
 
-- `security.md` and `git.md`: always
-- `api.md`: when working in `apps/api/` or `packages/shared/`
-- `web.md`: when working in `apps/web/`
+- `security.md` og `git.md`: altid
+- `api.md`: når du arbejder i `apps/api/` eller `packages/shared/`
+- `web.md`: når du arbejder i `apps/web/`
 
-Personal notes that must not be in git can go in `CLAUDE.local.md` (listed in `.gitignore`).
+Personlige noter, der ikke skal i git, kan ligge i `CLAUDE.local.md` (står i `.gitignore`).
 
-## Where are we?
+## Hvor er vi?
 
-See "Faser" (phases) in `docs/plan.md`. Current phase: **0. Foundation** (in progress).
+Se "Faser" i `docs/plan.md`. Nuværende fase: **0. Fundament** (i gang).
