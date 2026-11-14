@@ -17,9 +17,9 @@ backups/
 *.dump
 *.sql.gz
 
-# Personlige Claude-filer (delte regler ligger i .claude/rules og .claude/settings.json)
+# Local Claude Code config and notes (kept out of the public repo)
 CLAUDE.local.md
-.claude/settings.local.json
+.claude/
 
 # Logs og OS
 *.log
