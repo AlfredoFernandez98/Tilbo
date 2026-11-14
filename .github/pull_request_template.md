@@ -11,7 +11,7 @@
 
 ## Before merge
 - [ ] Title follows Conventional Commits
-- [ ] This PR does one thing
+- [ ] This PR does one thing and changes at most ~350 lines of code (lockfile and generated files excluded)
 - [ ] `check` and `gitleaks` are green
 - [ ] No secrets, personal data, server IPs or real user data in the diff
 - [ ] Docs, plan or ADR updated if a decision changed
