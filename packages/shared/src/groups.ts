@@ -19,3 +19,15 @@ export const groupResponseSchema = z.object({
 
 export type CreateGroupBody = z.infer<typeof createGroupBodySchema>;
 export type GroupResponse = z.infer<typeof groupResponseSchema>;
+
+export const groupIdParamsSchema = z.object({ groupId: z.uuid() });
+
+// The token is shown once, when the invite is created. The server only keeps its hash.
+export const inviteResponseSchema = z.object({
+  token: z.string(),
+  expiresAt: z.iso.datetime(),
+});
+
+export type InviteResponse = z.infer<typeof inviteResponseSchema>;
+
+export const acceptInviteBodySchema = z.object({ token: z.string().min(1).max(100) });
