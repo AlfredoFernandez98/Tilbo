@@ -1,4 +1,4 @@
-# Afhængigheder og build
+# Dependencies and build
 node_modules/
 dist/
 build/
@@ -6,23 +6,24 @@ coverage/
 *.tsbuildinfo
 .vite/
 
-# Hemmeligheder
+# Secrets
 .env
 .env.*
 !.env.example
 
-# Lokale data
+# Local data
 pgdata/
 .pglite/
 backups/
 *.dump
 *.sql.gz
 
-# Personlige Claude-filer (delte regler ligger i .claude/rules og .claude/settings.json)
+# Local Claude Code config and notes (kept out of the public repo)
+CLAUDE.md
 CLAUDE.local.md
-.claude/settings.local.json
+.claude/
 
-# Logs og OS
+# Logs and OS
 *.log
 npm-debug.log*
 pnpm-debug.log*
