@@ -1,4 +1,4 @@
-# Afhængigheder og build
+# Dependencies and build
 node_modules/
 dist/
 build/
@@ -6,12 +6,12 @@ coverage/
 *.tsbuildinfo
 .vite/
 
-# Hemmeligheder
+# Secrets
 .env
 .env.*
 !.env.example
 
-# Lokale data
+# Local data
 pgdata/
 backups/
 *.dump
@@ -21,7 +21,7 @@ backups/
 CLAUDE.local.md
 .claude/
 
-# Logs og OS
+# Logs and OS
 *.log
 npm-debug.log*
 pnpm-debug.log*
