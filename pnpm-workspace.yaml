@@ -3,3 +3,7 @@ packages:
   - "packages/*"
 
 engineStrict: true
+
+# Build-scripts kører ikke under install. esbuilds binær kommer som platformspakke.
+allowBuilds:
+  esbuild: false
