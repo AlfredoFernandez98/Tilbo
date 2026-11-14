@@ -9,8 +9,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.5.16",
     "@tilbo/shared": "workspace:*",
+    "drizzle-orm": "^0.45.4",
     "fastify": "^5.12.8",
     "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.11"
   }
 }

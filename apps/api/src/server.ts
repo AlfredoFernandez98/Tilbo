@@ -1,7 +1,8 @@
 import { buildApp } from "./app.ts";
 import { loadConfig } from "./config.ts";
+import { createDb } from "./db/client.ts";
 
 const config = loadConfig();
-const app = buildApp({ logger: config.NODE_ENV !== "test" });
+const app = buildApp(createDb(config.PGLITE_DIR), { logger: config.NODE_ENV !== "test" });
 
 await app.listen({ host: config.HOST, port: config.PORT });
