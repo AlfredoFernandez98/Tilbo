@@ -68,7 +68,7 @@ Seks skærme: Tilbud, Købsliste, Feed, Plan, Gruppe, Indstillinger. Plus login,
 | Backend | Node 24 LTS + TypeScript + Fastify | LTS til 2028. Lavt RAM-forbrug (1 GB droplet), ét sprog med frontend, gode AI-SDK'er |
 | TypeScript i API | Node kører `.ts` direkte (type stripping), intet build-trin | Færre værktøjer. Kræver `.ts` i imports og ingen `enum` (`erasableSyntaxOnly`) |
 | Auth | JWT i httpOnly-cookie, adgangskoder med argon2 | Se ADR 0001. Besluttet 14. november 2026 |
-| Test-database | PGlite (Postgres 17 i WebAssembly) i tests og lokalt, indtil Docker sættes op | Ingen Docker endnu. Samtidige kald testes først mod rigtig Postgres. Besluttet 14. november 2026 |
+| Test-database | PGlite (Postgres 18 i WebAssembly) i tests og lokalt, indtil Docker sættes op | Ingen Docker endnu. Samtidige kald testes først mod rigtig Postgres. Åbent: Postgres 17 eller 18 i produktion. Besluttet 14. november 2026 |
 | ORM | Drizzle | Tæt på SQL, migrations, nemt at bruge tsvector og pg_trgm |
 | Database | PostgreSQL 17 i Docker | Gratis, alt ét sted, nemt at flytte til managed senere |
 | Frontend | React + Vite + TanStack Query + TanStack Router + Tailwind + shadcn/ui | Kendt stack, typesikre routes, simpel state |
@@ -200,7 +200,7 @@ Matching af købsliste til tilbud: normaliser navne (små bogstaver, fjern mæng
 
 | Fase | Indhold | Færdig når |
 | --- | --- | --- |
-| 0. Fundament | Monorepo, CI, hello world, Postgres 17 lokalt i Docker | API'et kan forbinde til den lokale database |
+| 0. Fundament | Monorepo, CI, hello world, lokal database (PGlite) | API'et kan forbinde til den lokale database |
 | 1. Auth og grupper | Signup, login, JWT, profil, opret gruppe, invitation | To brugere er i samme gruppe |
 | 2. Købsliste og deploy | Fælles liste, noter, datoer, hvem tilføjede, afkryds. Dockerfiles, Caddy, droplet, deploy-workflow, backup og RAM-måling | Familien kan bruge listen på `https://tilbo.alfredofernandez.dk` |
 | 3. Tilbud og søgning | Seed, Tjek-adapter, nat-job, søg med filtre, detaljepanel | Man kan søge "skyr" og se rigtige tilbud |
@@ -286,11 +286,10 @@ Færdigt:
 Mangler i fase 0:
 
 - Slå Dependabot security updates til i GitHub (står som `disabled`)
-- `docker-compose.yml` med Postgres 17 til lokal udvikling
-- Drizzle og forbindelse fra API'et til databasen
-- Vitest mod rigtig Postgres (hul 13)
+- Drizzle og forbindelse fra API'et til en lokal database (PGlite, PR #23)
 
 Flyttet til fase 2 (besluttet 14. november 2026: vi bygger appen først og deployer, før familien skal bruge den):
 
 - Dockerfiles, Caddy, droplet og deploy-workflow (`deploy.yml`). En utestet Dockerfile til API'et ligger på branchen `feat/api-dockerfile`
+- `docker-compose.yml` med Postgres og Vitest mod rigtig Postgres (hul 13)
 - Backup væk fra serveren (hul 11) og RAM-måling (hul 15)
