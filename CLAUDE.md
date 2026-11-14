@@ -12,7 +12,7 @@ The whole plan is in `docs/plan.md`. It is the source of truth. If the code and 
 
 - Guide me step by step. One step at a time, and wait until I say it works before moving on
 - Briefly explain why, not only what. I am learning Node.js as I go (I know Java best)
-- Reply to me in Danish, short and simple. No long explanations
+- Write short and simple. No long explanations
 - Use bullets when there are several things
 - Tell me if something I ask for goes against the plan
 - When we decide something new, update `docs/plan.md` and, if relevant, add an ADR in `docs/adr/`
@@ -22,8 +22,9 @@ The whole plan is in `docs/plan.md`. It is the source of truth. If the code and 
 ## Language
 
 - Everything in git and on GitHub is English: code, comments, test names, README, docs, rules, ADRs, commits and PRs
-- Text that users see in the app (UI) is Danish
+- Text that users see in the app (UI) is Danish, also when it lives in code (e.g. `labels.ts`)
 - Chat with me is Danish
+- For now `docs/plan.md` is still in Danish. It will be translated in a separate PR
 
 ## Stack (decided)
 

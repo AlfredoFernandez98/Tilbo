@@ -6,7 +6,7 @@ A shared shopping list and offer search for the family.
 - Search this week's offers from Danish shops
 - See where the items on the list are cheapest
 
-Status: see [docs/plan.md](docs/plan.md) (the plan is in Danish).
+Status: phase 0 (foundation) in progress. See [docs/plan.md](docs/plan.md) (in Danish for now).
 
 ## Stack
 
@@ -25,6 +25,8 @@ pnpm dev
 - API: http://localhost:3000/api/health
 
 Check everything: `pnpm typecheck && pnpm test && pnpm build`.
+
+Database (`docker compose up -d db`) comes later in phase 0.
 
 ## Folders
 

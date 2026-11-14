@@ -10,7 +10,7 @@ paths:
 
 - A group has 1-10 members
 - A user can be in at most 5 groups
-- Groups are fully closed. Every query must filter on a group the user is a member of
+- Groups are fully closed. Every query must filter on the group the user is a member of
 - A user cannot be in two groups with the same name
 - Invitations expire after 7 days
 
