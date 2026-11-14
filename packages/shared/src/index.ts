@@ -19,3 +19,12 @@ export {
   type GroupResponse,
   type InviteResponse,
 } from "./groups.ts";
+export {
+  createItemBodySchema,
+  itemParamsSchema,
+  itemResponseSchema,
+  updateItemBodySchema,
+  type CreateItemBody,
+  type ItemResponse,
+  type UpdateItemBody,
+} from "./shopping-list.ts";
