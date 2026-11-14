@@ -47,10 +47,10 @@ export const invites = pgTable("invites", {
   groupId: uuid("group_id")
     .notNull()
     .references(() => groups.id, { onDelete: "cascade" }),
-  // Optional: version 1 only shares a link (hole 6).
-  email: text("email"),
-  token: text("token").notNull().unique(),
+  // A shared link several people can use until it expires. Only the sha256 of the token is stored,
+  // so a database leak cannot be used to join groups.
+  tokenHash: text("token_hash").notNull().unique(),
+  createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
-  acceptedAt: timestamp("accepted_at", { withTimezone: true }),
   createdAt: createdAt(),
 });
