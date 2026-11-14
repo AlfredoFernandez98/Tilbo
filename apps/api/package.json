@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@tilbo/shared": "workspace:*",
-    "fastify": "^5.12.7",
+    "fastify": "^5.12.8",
     "zod": "^4.6.7"
   }
 }
