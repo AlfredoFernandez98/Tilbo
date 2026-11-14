@@ -3,7 +3,7 @@ import { eq, sql } from "drizzle-orm";
 import { createGroupBodySchema, type GroupResponse } from "@tilbo/shared";
 import { groupMembers, groups } from "../../db/schema.ts";
 import { parse } from "../../lib/validate.ts";
-import { assertUserCanJoin, GroupRuleError } from "./membership.ts";
+import { assertUserCanJoin } from "./membership.ts";
 
 export async function groupsRoutes(app: FastifyInstance) {
   app.addHook("onRequest", app.authenticate);
@@ -11,28 +11,23 @@ export async function groupsRoutes(app: FastifyInstance) {
   app.post("/api/groups", async (req, reply) => {
     const body = parse(createGroupBodySchema, req.body);
     const userId = req.user.sub;
-    try {
-      const group = await app.db.transaction(async (tx) => {
-        await assertUserCanJoin(tx, userId, body.name);
-        const [created] = await tx
-          .insert(groups)
-          .values({ name: body.name, postalCode: body.postalCode, createdBy: userId })
-          .returning();
-        await tx.insert(groupMembers).values({ groupId: created!.id, userId, role: "admin" });
-        return created!;
-      });
-      const res: GroupResponse = {
-        id: group.id,
-        name: group.name,
-        postalCode: group.postalCode,
-        role: "admin",
-        memberCount: 1,
-      };
-      return reply.code(201).send(res);
-    } catch (err) {
-      if (err instanceof GroupRuleError) return reply.code(409).send({ error: err.code });
-      throw err;
-    }
+    const group = await app.db.transaction(async (tx) => {
+      await assertUserCanJoin(tx, userId, body.name);
+      const [created] = await tx
+        .insert(groups)
+        .values({ name: body.name, postalCode: body.postalCode, createdBy: userId })
+        .returning();
+      await tx.insert(groupMembers).values({ groupId: created!.id, userId, role: "admin" });
+      return created!;
+    });
+    const res: GroupResponse = {
+      id: group.id,
+      name: group.name,
+      postalCode: group.postalCode,
+      role: "admin",
+      memberCount: 1,
+    };
+    return reply.code(201).send(res);
   });
 
   // Only the caller's own groups, so groups stay closed to non-members.
@@ -52,6 +47,7 @@ export async function groupsRoutes(app: FastifyInstance) {
       })
       .from(groups)
       .innerJoin(mine, eq(mine.groupId, groups.id))
-      .orderBy(groups.name);
+      // Case-insensitive, so "anna" and "Zoo" sort as people expect.
+      .orderBy(sql`lower(${groups.name})`);
   });
 }

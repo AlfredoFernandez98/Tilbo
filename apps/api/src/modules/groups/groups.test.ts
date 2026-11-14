@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { GROUP_LIMITS, groupResponseSchema } from "@tilbo/shared";
+import { users } from "../../db/schema.ts";
 import { createTestApp, signupAs } from "../../test-utils.ts";
 
 let app: FastifyInstance;
@@ -28,12 +29,19 @@ describe("groups", () => {
   it("lists only the caller's own groups", async () => {
     const anna = await signupAs(app, "anna@example.com");
     const ben = await signupAs(app, "ben@example.com");
-    await createGroup(anna, "Home");
+    await createGroup(anna, "Zoo");
+    await createGroup(anna, "anna's");
     await createGroup(ben, "Work");
 
     const res = await listGroups(anna);
     expect(res.statusCode).toBe(200);
-    expect(res.json().map((g: { name: string }) => g.name)).toEqual(["Home"]);
+    expect(res.json().map((g: { name: string }) => g.name)).toEqual(["anna's", "Zoo"]);
+  });
+
+  it("treats a valid token for a deleted user as logged out", async () => {
+    const anna = await signupAs(app, "anna@example.com");
+    await app.db.delete(users);
+    expect((await createGroup(anna, "Home")).statusCode).toBe(401);
   });
 
   it("requires login", async () => {
