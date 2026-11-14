@@ -1,20 +1,20 @@
 # Tilbo
 
-Fælles købsliste og tilbudssøgning for familien.
+A shared shopping list and offer search for the family.
 
-- Én fælles liste pr. gruppe, med noter, hvem der tilføjede og hvornår
-- Søg i ugens tilbud fra danske butikker
-- Se hvor varerne på listen er billigst
+- One shared list per group, with notes, who added an item and when
+- Search this week's offers from Danish shops
+- See where the items on the list are cheapest
 
-Status: fase 0 (fundament) i gang. Se [docs/plan.md](docs/plan.md).
+Status: phase 0 (foundation) in progress. See [docs/plan.md](docs/plan.md) (in Danish for now).
 
 ## Stack
 
-Node 24, TypeScript, Fastify, Drizzle, PostgreSQL, React, Vite, Tailwind, shadcn/ui. pnpm monorepo. Docker Compose og Caddy på DigitalOcean.
+Node 24, TypeScript, Fastify, Drizzle, PostgreSQL, React, Vite, Tailwind, shadcn/ui. pnpm monorepo. Docker Compose and Caddy on DigitalOcean.
 
-## Kør lokalt
+## Run locally
 
-Kræver Node 24 (se `.nvmrc`, fx via `fnm`) og pnpm via `corepack enable pnpm`.
+Needs Node 24 (see `.nvmrc`, e.g. via `fnm`) and pnpm via `corepack enable pnpm`.
 
 ```bash
 pnpm install
@@ -24,15 +24,15 @@ pnpm dev
 - Web: http://localhost:5173
 - API: http://localhost:3000/api/health
 
-Tjek alt: `pnpm typecheck && pnpm test && pnpm build`.
+Check everything: `pnpm typecheck && pnpm test && pnpm build`.
 
-Database (`docker compose up -d db`) kommer senere i fase 0.
+Database (`docker compose up -d db`) comes later in phase 0.
 
-## Mapper
+## Folders
 
 ```
 apps/api        backend
 apps/web        frontend
-packages/shared delte typer
-docs/           plan og beslutninger
+packages/shared shared types
+docs/           plan and decisions
 ```
