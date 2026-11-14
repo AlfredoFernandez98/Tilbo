@@ -8,3 +8,10 @@ export {
   type SignupBody,
   type UserResponse,
 } from "./auth.ts";
+export {
+  createGroupBodySchema,
+  GROUP_LIMITS,
+  groupResponseSchema,
+  type CreateGroupBody,
+  type GroupResponse,
+} from "./groups.ts";
