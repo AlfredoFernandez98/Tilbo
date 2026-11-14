@@ -1,5 +1,5 @@
 {
-  "id": "43c614c7-8084-49db-8cf8-73e6c195663c",
+  "id": "93a31773-1cbc-4db5-86ad-32ae1440c345",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -270,18 +270,26 @@
           "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "users_email_unique": {
-          "name": "users_email_unique",
-          "nullsNotDistinct": false,
+      "indexes": {
+        "users_email_lower_idx": {
+          "name": "users_email_lower_idx",
           "columns": [
-            "email"
-          ]
+            {
+              "expression": "lower(\"email\")",
+              "asc": true,
+              "isExpression": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

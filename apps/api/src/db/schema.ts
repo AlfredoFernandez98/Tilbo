@@ -1,15 +1,20 @@
-import { index, pgEnum, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { index, pgEnum, pgTable, primaryKey, text, timestamp, uuid, uniqueIndex } from "drizzle-orm/pg-core";
 
 const createdAt = () => timestamp("created_at", { withTimezone: true }).notNull().defaultNow();
 
-export const users = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
-  // Stored lowercased, so the unique check ignores case.
-  email: text("email").notNull().unique(),
-  passwordHash: text("password_hash").notNull(),
-  createdAt: createdAt(),
-});
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull(),
+    email: text("email").notNull(),
+    passwordHash: text("password_hash").notNull(),
+    createdAt: createdAt(),
+  },
+  // The database itself rejects A@x.dk when a@x.dk exists, so no code path can forget it.
+  (t) => [uniqueIndex("users_email_lower_idx").on(sql`lower(${t.email})`)],
+);
 
 export const groups = pgTable("groups", {
   id: uuid("id").primaryKey().defaultRandom(),
