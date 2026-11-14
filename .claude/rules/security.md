@@ -1,18 +1,18 @@
-# Sikkerhed (repoet er offentligt)
+# Security (the repo is public)
 
-Repoet er offentligt og bruges i mit CV. Alt i git er offentligt for altid, også efter sletning.
+The repo is public and used in my CV. Everything in git is public forever, even after deletion.
 
-- Hemmeligheder kun i `.env` (står i `.gitignore`). `.env.example` har kun navne, aldrig værdier
-- På serveren: `.env` med `chmod 600`. I CI: GitHub Secrets
-- Læs, vis eller skriv aldrig værdien af en nøgle, adgangskode eller token, heller ikke i chat, logs, tests eller kommentarer
-- Ingen server-IP, personlige e-mails, rigtige brugerdata eller familiens navne i koden. Brug eksempeldata
-- Projektet er privat og har intet med mit arbejde at gøre. Ingen arbejdsmail, arbejdskonti eller arbejdsrepoer
-- Tjek `git diff --staged` for hemmeligheder før hver commit
-- Kommer en hemmelighed i git ved en fejl: stop og spørg mig. Ingen force-push eller omskrivning af historik på egen hånd
-- Tilbudsdata.dk's testnøgle må ikke bruges i appen
+- Secrets only in `.env` (listed in `.gitignore`). `.env.example` has names only, never values
+- On the server: `.env` with `chmod 600`. In CI: GitHub Secrets
+- Never read, show or write the value of a key, password or token, not in chat, logs, tests or comments either
+- No server IP, personal emails, real user data or family names in the code. Use example data
+- The project is private and has nothing to do with my job. No work email, work accounts or work repos
+- Check `git diff --staged` for secrets before every commit
+- If a secret gets into git by mistake: stop and ask me. No force-push or history rewriting on your own
+- Tilbudsdata.dk's test key must not be used in the app
 
-Sat op i fase 0:
+Set up in phase 0:
 
-- GitHub: Secret scanning og Push protection slået til (Settings → Code security)
-- `gitleaks` som pre-commit hook og i CI, så commits med nøgler bliver stoppet
-- Dependabot for sikkerhedsopdateringer
+- GitHub: Secret scanning and Push protection enabled (Settings → Code security)
+- `gitleaks` as a pre-commit hook and in CI, so commits with keys are stopped
+- Dependabot for security updates
