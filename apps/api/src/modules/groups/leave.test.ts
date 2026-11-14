@@ -47,7 +47,7 @@ describe("leave group", () => {
   it("makes the longest-standing member admin when the last admin leaves", async () => {
     const ben = await join("ben@example.com");
     const cleo = await join("cleo@example.com");
-    await leave(anna);
+    expect((await leave(anna)).statusCode).toBe(204);
 
     expect(await myGroups(ben)).toMatchObject([{ role: "admin", memberCount: 2 }]);
     expect(await myGroups(cleo)).toMatchObject([{ role: "member" }]);
