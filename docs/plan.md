@@ -198,9 +198,9 @@ Matching af købsliste til tilbud: normaliser navne (små bogstaver, fjern mæng
 
 | Fase | Indhold | Færdig når |
 | --- | --- | --- |
-| 0. Fundament | Monorepo, CI, Docker, Caddy, deploy, hello world | `https://tilbo.alfredofernandez.dk/api/health` svarer 200 |
+| 0. Fundament | Monorepo, CI, hello world, Postgres 17 lokalt i Docker | API'et kan forbinde til den lokale database |
 | 1. Auth og grupper | Signup, login, JWT, profil, opret gruppe, invitation | To brugere er i samme gruppe |
-| 2. Købsliste | Fælles liste, noter, datoer, hvem tilføjede, afkryds | Familien kan bruge listen |
+| 2. Købsliste og deploy | Fælles liste, noter, datoer, hvem tilføjede, afkryds. Dockerfiles, Caddy, droplet, deploy-workflow, backup og RAM-måling | Familien kan bruge listen på `https://tilbo.alfredofernandez.dk` |
 | 3. Tilbud og søgning | Seed, Tjek-adapter, nat-job, søg med filtre, detaljepanel | Man kan søge "skyr" og se rigtige tilbud |
 | 4. Feed og match | Feed, delingsregler, match liste til tilbud | Listen viser hvor varen er billigst |
 | 5. Notifikationer | In-app og e-mail | Mail når en vare kommer på tilbud |
@@ -230,11 +230,11 @@ Fundet 2. november 2026. Anbefalinger, ikke beslutninger endnu. Når et punkt er
 | 8 | Grænserne (5 medlemmer, 5 grupper, unikt navn) kan omgås af samtidige kald | Tjek i én transaktion med lås. Navne sammenlignes uden forskel på store og små bogstaver | 1 |
 | 9 | Hvordan ser de andre ændringer på listen | TanStack Query med `refetchInterval` (ca. 10 sek). Ingen websockets i version 1 | 2 |
 | 10 | Afkrydsning ved en fejl kan ikke fortrydes | "Fortryd" i et par sekunder efter afkrydsning | 2 |
-| 11 | `pg_dump` på samme droplet er ikke en rigtig backup | Kopiér også dumpet væk fra serveren (DigitalOcean Spaces eller egen maskine) | 0 |
+| 11 | `pg_dump` på samme droplet er ikke en rigtig backup | Kopiér også dumpet væk fra serveren (DigitalOcean Spaces eller egen maskine) | 2 |
 | 12 | Tidszone for cron-jobs | UTC eller `Europe/Copenhagen`. Dansk tid passer bedst til butikkernes uger. **Din beslutning** | 3 |
 | 13 | Testopsætning ikke valgt | Vitest, og en rigtig Postgres i Docker til API- og databasetests | 0 |
 | 14 | pg_trgm-indeks bliver ikke brugt til `%` uden den rigtige operatorklasse | `GIN (name_normalized gin_trgm_ops)` | 3 |
-| 15 | 1 GB RAM til Postgres, API og Caddy ved siden af det der kører i dag | Mål forbruget efter fase 0 før vi bygger videre | 0 |
+| 15 | 1 GB RAM til Postgres, API og Caddy ved siden af det der kører i dag | Mål forbruget ved første deploy i fase 2 | 2 |
 | 16 | Ingen licens i et offentligt repo betyder "alle rettigheder forbeholdt" | **Besluttet 2. november 2026:** ingen licens. Se afsnit 2 | 0 |
 | 17 | Git-mailen i commits er offentlig | Brug GitHubs noreply-adresse i dette repo før første commit | 0 |
 
@@ -284,7 +284,11 @@ Færdigt:
 Mangler i fase 0:
 
 - Slå Dependabot security updates til i GitHub (står som `disabled`)
-- Dockerfiles og Docker Compose (API, web, Postgres 17)
-- Caddy, droplet og deploy-workflow (`deploy.yml`)
-- Backup væk fra serveren (hul 11), RAM-måling (hul 15) og Vitest mod rigtig Postgres (hul 13)
-- Fase 0 er færdig, når `https://tilbo.alfredofernandez.dk/api/health` svarer 200
+- `docker-compose.yml` med Postgres 17 til lokal udvikling
+- Drizzle og forbindelse fra API'et til databasen
+- Vitest mod rigtig Postgres (hul 13)
+
+Flyttet til fase 2 (besluttet 14. november 2026: vi bygger appen først og deployer, før familien skal bruge den):
+
+- Dockerfiles, Caddy, droplet og deploy-workflow (`deploy.yml`). En utestet Dockerfile til API'et ligger på branchen `feat/api-dockerfile`
+- Backup væk fra serveren (hul 11) og RAM-måling (hul 15)
