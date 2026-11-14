@@ -1,4 +1,4 @@
-// Alle UI-ord der kan skifte navn senere (fx "Gruppe" til "Kurv") ligger her.
+// All UI words that may be renamed later (e.g. "Gruppe" to "Kurv") live here. The values are Danish UI text.
 export const labels = {
   group: "Gruppe",
   groups: "Grupper",

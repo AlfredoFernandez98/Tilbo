@@ -13,6 +13,7 @@ coverage/
 
 # Local data
 pgdata/
+.pglite/
 backups/
 *.dump
 *.sql.gz

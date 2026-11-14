@@ -4,7 +4,7 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   server: {
-    // I udvikling sendes /api videre til Fastify, så web og api deler origin ligesom bag Caddy i prod.
+    // In development /api is proxied to Fastify, so web and api share an origin, like behind Caddy in production.
     proxy: { "/api": "http://127.0.0.1:3000" },
   },
 });
