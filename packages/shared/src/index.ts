@@ -11,7 +11,10 @@ export {
 export {
   createGroupBodySchema,
   GROUP_LIMITS,
+  groupIdParamsSchema,
   groupResponseSchema,
+  inviteResponseSchema,
   type CreateGroupBody,
   type GroupResponse,
+  type InviteResponse,
 } from "./groups.ts";

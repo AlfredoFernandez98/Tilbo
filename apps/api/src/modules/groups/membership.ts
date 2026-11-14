@@ -27,3 +27,12 @@ export async function assertUserCanJoin(tx: Tx, userId: string, groupName: strin
     .where(and(eq(groupMembers.userId, userId), sql`lower(${groups.name}) = lower(${groupName})`));
   if (sameName) throw new HttpError(409, "group_name_taken");
 }
+
+// The caller's role in a group, or undefined if they are not a member.
+export async function getRole(db: Db | Tx, groupId: string, userId: string) {
+  const [row] = await db
+    .select({ role: groupMembers.role })
+    .from(groupMembers)
+    .where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)));
+  return row?.role;
+}
