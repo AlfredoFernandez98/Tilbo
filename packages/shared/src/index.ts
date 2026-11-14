@@ -13,6 +13,7 @@ export {
   GROUP_LIMITS,
   groupIdParamsSchema,
   groupResponseSchema,
+  acceptInviteBodySchema,
   inviteResponseSchema,
   type CreateGroupBody,
   type GroupResponse,
