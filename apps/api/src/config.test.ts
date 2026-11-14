@@ -3,7 +3,12 @@ import { loadConfig } from "./config.ts";
 
 describe("loadConfig", () => {
   it("bruger standardværdier", () => {
-    expect(loadConfig({})).toEqual({ NODE_ENV: "development", HOST: "127.0.0.1", PORT: 3000 });
+    expect(loadConfig({})).toEqual({
+      NODE_ENV: "development",
+      HOST: "127.0.0.1",
+      PORT: 3000,
+      PGLITE_DIR: ".pglite",
+    });
   });
 
   it("afviser en ugyldig port", () => {
