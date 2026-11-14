@@ -9,8 +9,8 @@ describe("fetchHealth", () => {
     await expect(fetchHealth()).resolves.toEqual({ status: "ok" });
   });
 
-  it("fails when the API answers with an error status", async () => {
+  it("fails when the API returns an error status", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response(null, { status: 502 })));
-    await expect(fetchHealth()).rejects.toThrow("API answered 502");
+    await expect(fetchHealth()).rejects.toThrow("API returned 502");
   });
 });

@@ -1,6 +1,6 @@
 version: 2
 updates:
-  # pnpm packages in the whole monorepo
+  # pnpm packages across the monorepo
   - package-ecosystem: npm
     directory: /
     schedule:

@@ -22,7 +22,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
-          # Auto-cache needs pnpm before corepack has enabled it.
+          # Auto-cache needs pnpm, which corepack has not enabled yet
           package-manager-cache: false
       - run: corepack enable pnpm
       - run: pnpm install --frozen-lockfile
