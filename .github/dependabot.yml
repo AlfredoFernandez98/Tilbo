@@ -1,6 +1,6 @@
 version: 2
 updates:
-  # pnpm-pakker i hele monorepoet
+  # pnpm packages in the whole monorepo
   - package-ecosystem: npm
     directory: /
     schedule:
@@ -11,7 +11,7 @@ updates:
       # Project runs Node 24, so types must stay on 24.x
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
-  # actions i .github/workflows
+  # actions in .github/workflows
   - package-ecosystem: github-actions
     directory: /
     schedule:

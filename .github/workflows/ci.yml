@@ -8,7 +8,7 @@ on:
 permissions:
   contents: read
 
-# Ny push på samme branch/PR stopper den gamle kørsel
+# A new push to the same branch/PR cancels the old run
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
@@ -22,7 +22,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
-          # Auto-cache kræver pnpm før corepack har slået det til.
+          # Auto-cache needs pnpm before corepack has enabled it.
           package-manager-cache: false
       - run: corepack enable pnpm
       - run: pnpm install --frozen-lockfile
