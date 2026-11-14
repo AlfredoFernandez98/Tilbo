@@ -266,3 +266,25 @@ Oprettet 3. november 2026. Ting der skal med, men ikke er planlagt i en fase end
 - Prishistorik: hvad har varen kostet før, og er tilbuddet reelt billigt
 - Købshistorik: hvad har gruppen købt, hvornår og hvor
 - Åbent: hvilken af dem er vigtigst, eller begge?
+
+## 11. Status
+
+Opdateret 14. november 2026. Nuværende fase: **0. Fundament** (i gang).
+
+Færdigt:
+
+- Monorepo, API (Fastify, `/health`) og web (Vite, React, TanStack Query)
+- CI med `check` og `gitleaks`, `concurrency` og timeouts. Kører ikke dobbelt på PR-branches
+- Ruleset på `main`: kræver PR, kun squash-merge, blokerer force-push og sletning, kræver `check` og `gitleaks`
+- gitleaks som pre-commit hook (`.githooks`). Secret scanning og push protection er slået til
+- Dependabot hver uge for npm og Actions. Ignorerer major-versioner af `@types/node`. Alle åbne opdateringer er merged
+- PR-skabelon og PR-regler (`.github/pull_request_template.md`, `.claude/rules/git.md`)
+- Kørt lokalt på `main`: `typecheck`, 5 tests, `build` og `pnpm audit` uden fejl
+
+Mangler i fase 0:
+
+- Slå Dependabot security updates til i GitHub (står som `disabled`)
+- Dockerfiles og Docker Compose (API, web, Postgres 17)
+- Caddy, droplet og deploy-workflow (`deploy.yml`)
+- Backup væk fra serveren (hul 11), RAM-måling (hul 15) og Vitest mod rigtig Postgres (hul 13)
+- Fase 0 er færdig, når `https://tilbo.alfredofernandez.dk/api/health` svarer 200
