@@ -1,9 +1,11 @@
 import { buildApp } from "./app.ts";
 import { loadConfig } from "./config.ts";
-import { createDb } from "./db/client.ts";
+import { createDb, migrateDb } from "./db/client.ts";
 
 const config = loadConfig();
-const app = buildApp(createDb(config.PGLITE_DIR), { logger: config.NODE_ENV !== "test" });
+const db = createDb(config.PGLITE_DIR);
+await migrateDb(db);
+const app = buildApp(db, { logger: config.NODE_ENV !== "test" });
 
 for (const signal of ["SIGINT", "SIGTERM"]) {
   process.once(signal, () => void app.close());

@@ -3,3 +3,7 @@ packages:
   - "packages/*"
 
 engineStrict: true
+
+# Do not run build scripts on install. esbuild (via drizzle-kit) ships its binary as a platform package.
+allowBuilds:
+  esbuild: false
