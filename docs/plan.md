@@ -1,6 +1,6 @@
 # Tilbo: plan
 
-Sidst opdateret: 3. november 2026
+Sidst opdateret: 14. november 2026
 
 Tilbo er en fælles købsliste og tilbudssøgning. Den starter som en app til familien, men er bygget så flere grupper kan komme til, og så den kan udgives som rigtig app senere.
 
@@ -78,6 +78,7 @@ Seks skærme: Tilbud, Købsliste, Feed, Plan, Gruppe, Indstillinger. Plus login,
 | Deploy | GitHub Actions bygger images til GHCR og deployer via SSH | Ingen overhead på serveren (ikke Coolify/Dokploy) |
 | Ikke valgt | Java/Spring Boot, Next.js, NestJS, Prisma | For tungt eller passer dårligt til nat-jobs og søgning |
 | Licens | Ingen (alle rettigheder forbeholdt) | Koden kan læses i CV'et, men ikke kopieres, hvis appen udgives. MIT kan tilføjes senere |
+| Git og PR'er | Feature-branches og PR til `main`, kun squash-merge, Conventional Commits. Commits og PR-tekst på engelsk. Skabelon i `.github/pull_request_template.md` | `main` er altid deploybar, og historikken er læsbar i CV'et. Reglerne står i `.claude/rules/git.md`. Besluttet 14. november 2026 |
 
 ## 3. Datakilder
 
