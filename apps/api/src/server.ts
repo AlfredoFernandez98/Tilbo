@@ -5,7 +5,7 @@ import { createDb, migrateDb } from "./db/client.ts";
 const config = loadConfig();
 const db = createDb(config.PGLITE_DIR);
 await migrateDb(db);
-const app = buildApp(db, { logger: config.NODE_ENV !== "test" });
+const app = buildApp(db, config, { logger: config.NODE_ENV !== "test" });
 
 for (const signal of ["SIGINT", "SIGTERM"]) {
   process.once(signal, () => void app.close());
