@@ -4,6 +4,7 @@ import jwt from "@fastify/jwt";
 import type { Config } from "./config.ts";
 import type { Db } from "./db/client.ts";
 import { AUTH_COOKIE, authRoutes } from "./modules/auth/auth.routes.ts";
+import { groupsRoutes } from "./modules/groups/groups.routes.ts";
 import { healthRoutes } from "./modules/health/health.routes.ts";
 
 declare module "fastify" {
@@ -68,5 +69,6 @@ export function buildApp(db: Db, config: Config, opts: FastifyServerOptions = {}
 
   app.register(healthRoutes);
   app.register(authRoutes);
+  app.register(groupsRoutes);
   return app;
 }
