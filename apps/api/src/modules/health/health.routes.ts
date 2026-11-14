@@ -3,9 +3,14 @@ import { sql } from "drizzle-orm";
 import type { HealthResponse } from "@tilbo/shared";
 
 export async function healthRoutes(app: FastifyInstance) {
-  // Svarer kun ok, hvis databasen også svarer. Fejl giver 500 via Fastifys standard-handler.
-  app.get("/api/health", async (): Promise<HealthResponse> => {
-    await app.db.execute(sql`select 1`);
-    return { status: "ok" };
+  // Healthy only if the database answers. The public reply never includes the error text.
+  app.get("/api/health", async (req, reply): Promise<HealthResponse | void> => {
+    try {
+      await app.db.execute(sql`select 1`);
+      return { status: "ok" };
+    } catch (err) {
+      req.log.error({ err }, "database health check failed");
+      return reply.code(503).send({ status: "unavailable" });
+    }
   });
 }

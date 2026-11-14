@@ -1,7 +1,7 @@
 import { PGlite } from "@electric-sql/pglite";
 import { drizzle } from "drizzle-orm/pglite";
 
-// shortcut: PGlite (Postgres i WebAssembly, én forbindelse) indtil Docker er sat op. Skift til node-postgres før deploy (fase 2).
+// shortcut: PGlite (Postgres in WebAssembly, one connection) until Docker is set up. Switch to node-postgres before deploy (phase 2).
 export function createDb(dataDir: string) {
   return drizzle(new PGlite(dataDir));
 }
