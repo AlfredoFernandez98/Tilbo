@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { itemResponseSchema } from "@tilbo/shared";
-import { shoppingLists } from "../../db/schema.ts";
+import { eq } from "drizzle-orm";
+import { listItems, users } from "../../db/schema.ts";
 import { createTestApp, signupAs } from "../../test-utils.ts";
 
 type Cookies = Record<string, string>;
@@ -47,10 +48,27 @@ describe("shopping list", () => {
     expect(list.json()).toMatchObject([{ name: "Skyr", addedBy: "Anna", checkedAt: null }]);
   });
 
-  it("creates the group's one list only once", async () => {
-    await items(anna);
-    await add(anna, { name: "Milk" });
-    expect(await app.db.select().from(shoppingLists)).toHaveLength(1);
+  it("keeps who bought it when a second member checks a stale list, and clears it on undo", async () => {
+    const ben = await joinAs("ben@example.com", "Ben");
+    const { id } = (await add(anna, { name: "Milk" })).json();
+    const [annaUser] = await app.db.select().from(users).where(eq(users.email, "anna@example.com"));
+    const row = async () => (await app.db.select().from(listItems).where(eq(listItems.id, id)))[0]!;
+
+    await update(anna, id, { checked: true });
+    const first = await row();
+    expect(first.checkedBy).toBe(annaUser!.id);
+
+    await update(ben, id, { checked: true });
+    const second = await row();
+    expect(second.checkedBy).toBe(annaUser!.id);
+    expect(second.checkedAt).toEqual(first.checkedAt);
+
+    await update(ben, id, { checked: false });
+    expect((await row()).checkedBy).toBeNull();
+  });
+
+  it("stores a blank note as no note", async () => {
+    expect((await add(anna, { name: "Milk", note: "   " })).json().note).toBeNull();
   });
 
   it("hides checked items and brings them back on undo", async () => {

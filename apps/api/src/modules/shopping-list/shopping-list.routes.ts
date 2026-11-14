@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, eq, isNull, sql } from "drizzle-orm";
 import {
   createItemBodySchema,
   groupIdParamsSchema,
@@ -8,18 +8,20 @@ import {
   type ItemResponse,
 } from "@tilbo/shared";
 import type { Db } from "../../db/client.ts";
-import { listItems, shoppingLists, users } from "../../db/schema.ts";
+import { groupMembers, listItems, shoppingLists, users } from "../../db/schema.ts";
 import { HttpError } from "../../lib/http-error.ts";
 import { parse } from "../../lib/validate.ts";
-import { getRole } from "../groups/membership.ts";
 
-// Groups are closed: every route checks membership first. Non-members get 404.
+// Groups are closed: the list is only found through the caller's membership. Non-members get 404.
+// The list is created together with the group (POST /api/groups).
 async function listIdFor(db: Db, groupId: string, userId: string) {
-  if (!(await getRole(db, groupId, userId))) throw new HttpError(404, "group_not_found");
-  // The list is created on first use; on conflict another request created it first.
-  await db.insert(shoppingLists).values({ groupId }).onConflictDoNothing();
-  const [list] = await db.select({ id: shoppingLists.id }).from(shoppingLists).where(eq(shoppingLists.groupId, groupId));
-  return list!.id;
+  const [list] = await db
+    .select({ id: shoppingLists.id })
+    .from(shoppingLists)
+    .innerJoin(groupMembers, and(eq(groupMembers.groupId, shoppingLists.groupId), eq(groupMembers.userId, userId)))
+    .where(eq(shoppingLists.groupId, groupId));
+  if (!list) throw new HttpError(404, "group_not_found");
+  return list.id;
 }
 
 const itemColumns = {
@@ -72,8 +74,16 @@ export async function shoppingListRoutes(app: FastifyInstance) {
     const userId = req.user.sub;
     const listId = await listIdFor(app.db, groupId, userId);
 
+    // The first check wins: a second member checking a stale list does not overwrite who bought it.
     const check =
-      body.checked === undefined ? {} : body.checked ? { checkedBy: userId, checkedAt: new Date() } : { checkedBy: null, checkedAt: null };
+      body.checked === undefined
+        ? {}
+        : body.checked
+          ? {
+              checkedAt: sql`coalesce(${listItems.checkedAt}, now())`,
+              checkedBy: sql`case when ${listItems.checkedAt} is null then ${userId}::uuid else ${listItems.checkedBy} end`,
+            }
+          : { checkedBy: null, checkedAt: null };
     // Filtering on listId too, so an item id from another group cannot be changed.
     const [updated] = await app.db
       .update(listItems)

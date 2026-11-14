@@ -2,16 +2,23 @@ import { z } from "zod";
 
 export const itemParamsSchema = z.object({ groupId: z.uuid(), itemId: z.uuid() });
 
+// A blank note is stored as no note.
+const optionalNote = z
+  .string()
+  .trim()
+  .max(200)
+  .transform((s) => s || null);
+
 export const createItemBodySchema = z.object({
   name: z.string().trim().min(1).max(100),
-  note: z.string().trim().max(200).optional(),
+  note: optionalNote.optional(),
 });
 
 // Any subset; `checked: false` undoes a check by mistake (hole 10).
 export const updateItemBodySchema = z
   .object({
     name: z.string().trim().min(1).max(100),
-    note: z.string().trim().max(200).nullable(),
+    note: optionalNote.nullable(),
     checked: z.boolean(),
   })
   .partial()
@@ -26,6 +33,7 @@ export const itemResponseSchema = z.object({
   checkedAt: z.iso.datetime().nullable(),
 });
 
-export type CreateItemBody = z.infer<typeof createItemBodySchema>;
-export type UpdateItemBody = z.infer<typeof updateItemBodySchema>;
+// Input types: what a client sends (before the blank-note transform).
+export type CreateItemBody = z.input<typeof createItemBodySchema>;
+export type UpdateItemBody = z.input<typeof updateItemBodySchema>;
 export type ItemResponse = z.infer<typeof itemResponseSchema>;
