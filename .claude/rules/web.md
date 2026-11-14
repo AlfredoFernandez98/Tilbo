@@ -5,9 +5,9 @@ paths:
 
 # Frontend
 
-- Feature folders: `apps/web/src/features/<feature>/`, same names as `apps/api/src/modules/`
-- Shared types and zod schemas come from `packages/shared`
-- The UI word "Gruppe" lives in one place (e.g. `packages/shared/src/labels.ts`), so it can be renamed
-- Times are shown in Danish time
-- Tests in the same change as new behaviour
-- Small, focused changes. No clean-up in code we are not working on
+- Feature-mapper: `apps/web/src/features/<feature>/`, samme navne som `apps/api/src/modules/`
+- Delte typer og zod-skemaer hentes fra `packages/shared`
+- Ordet "Gruppe" i UI'et ligger ét sted (fx `packages/shared/src/labels.ts`), så det kan skiftes
+- Tider vises i dansk tid
+- Tests i samme ændring som ny adfærd
+- Små, fokuserede ændringer. Ingen oprydning i kode vi ikke arbejder på

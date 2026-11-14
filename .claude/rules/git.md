@@ -1,19 +1,19 @@
 # Git
 
-- `main` is always deployable. Feature branches and PRs
-- Branch names in English with a type prefix, e.g. `docs/backlog`, `feat/shopping-list`
-- Conventional Commits. Types: `feat`, `fix`, `docs`, `chore`, `ci`, `refactor`. Scope is optional, e.g. `feat(web):`
-- Commits, PR titles and PR descriptions are written in English
-- No AI signature in commits or PRs
-- Only commit files needed to build, run or understand the app. Mockups, exports and other reference material stay out of git
+- `main` er altid deploybar. Feature-branches og PR
+- Branch-navne på engelsk med type-præfiks, fx `docs/backlog`, `feat/shopping-list`
+- Conventional Commits. Typer: `feat`, `fix`, `docs`, `chore`, `ci`, `refactor`. Scope er valgfri, fx `feat(web):`
+- Commits, PR-titler og PR-beskrivelser skrives på engelsk
+- Ingen AI-signatur i commits eller PR'er
+- Commit kun filer der skal bruges til at bygge, køre eller forstå appen. Mockups, eksporter og andet referencemateriale kommer ikke i git
 
 ## Pull requests
 
-The template is in `.github/pull_request_template.md`. Only squash merge is allowed (enforced by the ruleset on `main`).
+Skabelonen ligger i `.github/pull_request_template.md`. Kun squash-merge er tilladt (håndhæves af ruleset på `main`).
 
-- Title: `type(scope): imperative summary`, at most 72 characters, no full stop. The title becomes the commit on `main`. Dependabot's own titles are exempt
-- Description with three sections: `## What and why`, `## How it was verified` (commands and result, and what was not tested), `## Notes` (optional: risks, follow-up). Then the `## Before merge` checklist
-- One PR does one thing. Better too small than too big. Refactoring in a separate PR
-- At most about 350 changed lines of code per PR, unless I say otherwise. `pnpm-lock.yaml` and generated files (e.g. migrations) do not count. If it grows bigger, split it into several PRs
-- Before merge the whole template checklist must hold: title follows Conventional Commits, one thing and at most about 350 lines, `check` and `gitleaks` green, no secrets or personal data in the diff, docs/plan/ADR updated if a decision changed, the description still matches the final diff
-- Claude checks the checklist before opening a PR, and fixes the description if the diff changes
+- Titel: `type(scope): imperative summary`, højst 72 tegn, intet punktum. Titlen bliver commit på `main`. Dependabots egne titler er undtaget
+- Beskrivelse med tre afsnit: `## What and why`, `## How it was verified` (kommandoer og resultat, og hvad der ikke er testet), `## Notes` (valgfri: risici, opfølgning). Derefter tjeklisten `## Before merge`
+- Én PR gør én ting. Hellere for lille end for stor. Refactor i en separat PR
+- Højst ca. 350 ændrede linjer kode pr. PR, medmindre jeg siger andet. `pnpm-lock.yaml` og genererede filer (fx migrations) tæller ikke med. Bliver det større, så del op i flere PR'er
+- Før merge skal hele tjeklisten i skabelonen være opfyldt: titel følger Conventional Commits, én ting og højst ca. 350 linjer, `check` og `gitleaks` grønne, ingen hemmeligheder eller persondata i diff, docs/plan/ADR opdateret hvis en beslutning er ændret, beskrivelsen passer stadig til den endelige diff
+- Claude tjekker tjeklisten, før en PR åbnes, og retter beskrivelsen hvis diff'en ændrer sig
