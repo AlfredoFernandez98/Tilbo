@@ -36,6 +36,18 @@ export function buildApp(db: Db, config: Config, opts: FastifyServerOptions = {}
     secret: config.JWT_SECRET,
     cookie: { cookieName: AUTH_COOKIE, signed: false },
     sign: { expiresIn: "7d" },
+    // Only the cookie, not an Authorization header (ADR 0001).
+    verify: { onlyCookie: true },
+  });
+
+  // Never send internal error text to clients: database errors contain the SQL and its params.
+  app.setErrorHandler((err: { statusCode?: number; message: string }, req, reply) => {
+    const status = err.statusCode ?? 500;
+    if (status >= 500) {
+      req.log.error({ err }, "request failed");
+      return reply.code(status).send({ error: "internal" });
+    }
+    return reply.code(status).send({ error: err.message });
   });
 
   // CSRF guard (ADR 0001): browsers always send Origin on cross-site writes, so a foreign Origin is refused.

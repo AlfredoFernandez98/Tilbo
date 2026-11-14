@@ -10,7 +10,11 @@ const envSchema = z.object({
   // Signs the login cookie. Generate with: openssl rand -base64 48
   JWT_SECRET: z.string().min(32),
   // The web app's origin. Write requests from any other origin are rejected (ADR 0001).
-  APP_ORIGIN: z.url().default("http://localhost:5173"),
+  // Normalised to scheme://host[:port], because browsers send Origin without a trailing slash.
+  APP_ORIGIN: z
+    .url()
+    .default("http://localhost:5173")
+    .transform((u) => new URL(u).origin),
 });
 
 export type Config = z.infer<typeof envSchema>;
