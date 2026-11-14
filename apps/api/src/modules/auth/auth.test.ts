@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
+import { sql } from "drizzle-orm";
 import { userResponseSchema } from "@tilbo/shared";
+import { buildApp } from "../../app.ts";
+import { createTestDb } from "../../db/client.ts";
 import { createTestApp, testConfig } from "../../test-utils.ts";
 import { AUTH_COOKIE } from "./auth.routes.ts";
 
@@ -95,5 +98,32 @@ describe("auth", () => {
       payload,
     });
     expect(own.statusCode).toBe(201);
+  });
+
+  it("hides database errors: 500 with no SQL, email or hash in the reply", async () => {
+    // A failed query carries the SQL and its params (email, password hash) in its message.
+    await app.db.execute(sql`drop table users cascade`);
+    const res = await signup();
+
+    expect(res.statusCode).toBe(500);
+    expect(res.json()).toEqual({ error: "internal" });
+    expect(res.body).not.toMatch(/argon2|example\.com|insert/i);
+  });
+
+  it("ignores a token sent as a Bearer header instead of the cookie", async () => {
+    const token = sessionCookie(await signup())!.value;
+    const res = await app.inject({ method: "GET", url: "/api/auth/me", headers: { authorization: `Bearer ${token}` } });
+    expect(res.statusCode).toBe(401);
+  });
+
+  it("marks the cookie Secure in production", async () => {
+    const prod = buildApp(await createTestDb(), { ...testConfig, NODE_ENV: "production" });
+    const res = await prod.inject({
+      method: "POST",
+      url: "/api/auth/signup",
+      payload: { name: "Anna", email: "anna@example.com", password: "correct horse" },
+    });
+    expect(sessionCookie(res)?.secure).toBe(true);
+    await prod.close();
   });
 });

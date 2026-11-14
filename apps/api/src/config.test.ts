@@ -15,6 +15,12 @@ describe("loadConfig", () => {
     });
   });
 
+  it("strips a trailing slash from APP_ORIGIN, since browsers send Origin without it", () => {
+    expect(loadConfig({ JWT_SECRET, APP_ORIGIN: "https://Tilbo.Example.com/" }).APP_ORIGIN).toBe(
+      "https://tilbo.example.com",
+    );
+  });
+
   it("rejects an invalid port", () => {
     expect(() => loadConfig({ JWT_SECRET, PORT: "abc" })).toThrow();
   });
