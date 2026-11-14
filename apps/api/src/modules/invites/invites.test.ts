@@ -24,7 +24,7 @@ function createGroup(cookies: Cookies, name: string) {
 const invite = (cookies: Cookies, id = groupId) =>
   app.inject({ method: "POST", url: `/api/groups/${id}/invites`, cookies });
 const accept = (cookies: Cookies, token: string) =>
-  app.inject({ method: "POST", url: `/api/invites/${token}/accept`, cookies });
+  app.inject({ method: "POST", url: "/api/invites/accept", cookies, payload: { token } });
 const newToken = async () => inviteResponseSchema.parse((await invite(anna)).json()).token;
 
 describe("invites", () => {

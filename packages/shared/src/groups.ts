@@ -29,3 +29,5 @@ export const inviteResponseSchema = z.object({
 });
 
 export type InviteResponse = z.infer<typeof inviteResponseSchema>;
+
+export const acceptInviteBodySchema = z.object({ token: z.string().min(1).max(100) });

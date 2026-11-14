@@ -1,8 +1,13 @@
 import { createHash, randomBytes } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { and, count, eq, gt } from "drizzle-orm";
-import { z } from "zod";
-import { GROUP_LIMITS, groupIdParamsSchema, type GroupResponse, type InviteResponse } from "@tilbo/shared";
+import {
+  acceptInviteBodySchema,
+  GROUP_LIMITS,
+  groupIdParamsSchema,
+  type GroupResponse,
+  type InviteResponse,
+} from "@tilbo/shared";
 import { groupMembers, groups, invites } from "../../db/schema.ts";
 import { HttpError } from "../../lib/http-error.ts";
 import { parse } from "../../lib/validate.ts";
@@ -10,7 +15,6 @@ import { assertUserCanJoin, getRole } from "../groups/membership.ts";
 
 const INVITE_DAYS = 7;
 const sha256 = (token: string) => createHash("sha256").update(token).digest("hex");
-const tokenParamsSchema = z.object({ token: z.string().min(1).max(100) });
 
 export async function invitesRoutes(app: FastifyInstance) {
   app.addHook("onRequest", app.authenticate);
@@ -31,25 +35,27 @@ export async function invitesRoutes(app: FastifyInstance) {
   });
 
   // A shared link: anyone logged in with the token can join until it expires or the group is full.
-  app.post("/api/invites/:token/accept", async (req): Promise<GroupResponse> => {
-    const { token } = parse(tokenParamsSchema, req.params);
+  // The token is in the body, not the URL, so it never ends up in request logs (security.md).
+  app.post("/api/invites/accept", async (req): Promise<GroupResponse> => {
+    const { token } = parse(acceptInviteBodySchema, req.body);
     const userId = req.user.sub;
 
     return app.db.transaction(async (tx) => {
-      const [invite] = await tx
-        .select({ groupId: invites.groupId })
+      const [group] = await tx
+        .select({ id: groups.id, name: groups.name, postalCode: groups.postalCode })
         .from(invites)
+        .innerJoin(groups, eq(groups.id, invites.groupId))
         .where(and(eq(invites.tokenHash, sha256(token)), gt(invites.expiresAt, new Date())));
       // Unknown and expired links look the same.
-      if (!invite) throw new HttpError(404, "invite_not_found");
-
-      if (await getRole(tx, invite.groupId, userId)) throw new HttpError(409, "already_member");
-
-      const [group] = await tx.select().from(groups).where(eq(groups.id, invite.groupId));
       if (!group) throw new HttpError(404, "invite_not_found");
-      // Locks the user row first, then the group row below: always this order, so no deadlocks.
+
+      if (await getRole(tx, group.id, userId)) throw new HttpError(409, "already_member");
+
+      // Locks the user row first, then the group row: always this order, so no deadlocks.
       await assertUserCanJoin(tx, userId, group.name);
-      await tx.select({ id: groups.id }).from(groups).where(eq(groups.id, group.id)).for("update");
+      const [locked] = await tx.select({ id: groups.id }).from(groups).where(eq(groups.id, group.id)).for("update");
+      // The group may have been deleted (last member left) between the read and the lock.
+      if (!locked) throw new HttpError(404, "invite_not_found");
 
       const [{ value: members } = { value: 0 }] = await tx
         .select({ value: count() })
