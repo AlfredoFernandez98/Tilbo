@@ -7,6 +7,7 @@ import { AUTH_COOKIE, authRoutes } from "./modules/auth/auth.routes.ts";
 import { groupsRoutes } from "./modules/groups/groups.routes.ts";
 import { healthRoutes } from "./modules/health/health.routes.ts";
 import { invitesRoutes } from "./modules/invites/invites.routes.ts";
+import { shoppingListRoutes } from "./modules/shopping-list/shopping-list.routes.ts";
 
 declare module "fastify" {
   interface FastifyInstance {
@@ -72,5 +73,6 @@ export function buildApp(db: Db, config: Config, opts: FastifyServerOptions = {}
   app.register(authRoutes);
   app.register(groupsRoutes);
   app.register(invitesRoutes);
+  app.register(shoppingListRoutes);
   return app;
 }

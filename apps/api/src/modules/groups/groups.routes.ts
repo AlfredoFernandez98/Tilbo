@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { and, asc, eq, sql } from "drizzle-orm";
 import { createGroupBodySchema, groupIdParamsSchema, type GroupResponse } from "@tilbo/shared";
-import { groupMembers, groups } from "../../db/schema.ts";
+import { groupMembers, groups, shoppingLists } from "../../db/schema.ts";
 import { HttpError } from "../../lib/http-error.ts";
 import { parse } from "../../lib/validate.ts";
 import { assertUserCanJoin, getRole } from "./membership.ts";
@@ -19,6 +19,7 @@ export async function groupsRoutes(app: FastifyInstance) {
         .values({ name: body.name, postalCode: body.postalCode, createdBy: userId })
         .returning();
       await tx.insert(groupMembers).values({ groupId: created!.id, userId, role: "admin" });
+      await tx.insert(shoppingLists).values({ groupId: created!.id });
       return created!;
     });
     const res: GroupResponse = {
