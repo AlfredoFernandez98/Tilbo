@@ -18,6 +18,7 @@ backups/
 *.sql.gz
 
 # Local Claude Code config and notes (kept out of the public repo)
+CLAUDE.md
 CLAUDE.local.md
 .claude/
 
