@@ -8,8 +8,8 @@ Tilbo er en fælles købsliste og tilbudssøgning. Den starter som en app til fa
 
 ### Brugere og grupper
 
-- Hver bruger har sin egen profil: navn, e-mail, adgangskode, postnummer
-- En gruppe har 1-5 medlemmer. Invitationer stoppes, når gruppen er fuld
+- Hver bruger har sin egen profil: navn, e-mail, adgangskode
+- En gruppe har 1-10 medlemmer. Invitationer stoppes, når gruppen er fuld
 - En bruger kan være med i maks 5 grupper
 - Grupper er helt lukkede: er du i gruppe 1, kan du ikke se noget fra gruppe 2 (lister, noter, søgninger, medlemmer, feed)
 - Man skifter mellem sine grupper i appen og ser kun den valgte gruppe
@@ -67,6 +67,8 @@ Seks skærme: Tilbud, Købsliste, Feed, Plan, Gruppe, Indstillinger. Plus login,
 | --- | --- | --- |
 | Backend | Node 24 LTS + TypeScript + Fastify | LTS til 2028. Lavt RAM-forbrug (1 GB droplet), ét sprog med frontend, gode AI-SDK'er |
 | TypeScript i API | Node kører `.ts` direkte (type stripping), intet build-trin | Færre værktøjer. Kræver `.ts` i imports og ingen `enum` (`erasableSyntaxOnly`) |
+| Auth | JWT i httpOnly-cookie, adgangskoder med argon2 | Se ADR 0001. Besluttet 14. november 2026 |
+| Test-database | PGlite (Postgres 17 i WebAssembly) i tests og lokalt, indtil Docker sættes op | Ingen Docker endnu. Samtidige kald testes først mod rigtig Postgres. Besluttet 14. november 2026 |
 | ORM | Drizzle | Tæt på SQL, migrations, nemt at bruge tsvector og pg_trgm |
 | Database | PostgreSQL 17 i Docker | Gratis, alt ét sted, nemt at flytte til managed senere |
 | Frontend | React + Vite + TanStack Query + TanStack Router + Tailwind + shadcn/ui | Kendt stack, typesikre routes, simpel state |
@@ -161,10 +163,10 @@ Princip: feature-mapper, ikke lag. Alt om grupper ligger i `modules/groups/`.
 
 | Tabel | Vigtige kolonner | Bemærk |
 | --- | --- | --- |
-| `users` | id, name, email (unik), password_hash, postal_code, created_at | |
-| `groups` | id, name, invite_code (unik), postal_code, created_by, created_at | Maks 5 medlemmer |
+| `users` | id, name, email (unik), password_hash, created_at | Intet postnummer (hul 3) |
+| `groups` | id, name, postal_code, created_by, created_at | Maks 10 medlemmer. Invitationskoden ligger i `invites` (hul 4) |
 | `group_members` | group_id, user_id, role (`admin`/`member`), joined_at | PK (group_id, user_id). Maks 5 grupper pr. bruger. Ingen to grupper med samme navn for samme bruger |
-| `invites` | id, group_id, email, token, expires_at, accepted_at | expires_at = nu + 7 dage |
+| `invites` | id, group_id, email (valgfri), token, expires_at, accepted_at | expires_at = nu + 7 dage. Version 1 kun link, ingen e-mail |
 | `stores` | id, name, chain, source_dealer_id | |
 | `offers` | id, source, source_offer_id, name, name_normalized, price, normal_price, unit, quantity, store_id, valid_from, valid_to, image_url, category, search_vector, imported_at | Unik (source, source_offer_id). GIN på search_vector og name_normalized |
 | `shopping_lists` | id, group_id, name | Én pr. gruppe |
@@ -222,17 +224,17 @@ Fundet 2. november 2026. Anbefalinger, ikke beslutninger endnu. Når et punkt er
 | --- | --- | --- | --- |
 | 1 | Tjek `/offers/search` kræver et søgeord, så natjobbet kan ikke hente alle tilbud for et område. API'et er ikke officielt | Find et endpoint der lister tilbud for et område. Læs deres vilkår | 3 |
 | 2 | Tjek skal bruge lat/lng, gruppen har et postnummer | Statisk tabel med postnumre og deres midtpunkt i `packages/shared` | 3 |
-| 3 | Både `users` og `groups` har postnummer | Fjern det fra `users`, eller brug det kun som forslag når man opretter en gruppe | 1 |
-| 4 | `groups.invite_code` udløber aldrig, men invitationer skal udløbe efter 7 dage | Koden ligger i `invites` med `expires_at`, ikke på gruppen | 1 |
-| 5 | Auth er ikke beskrevet | JWT i httpOnly-cookie (ikke localStorage), adgangskoder med argon2, nulstil adgangskode via e-mail | 1 |
+| 3 | Både `users` og `groups` har postnummer | **Besluttet 14. november 2026:** kun på gruppen | 1 |
+| 4 | `groups.invite_code` udløber aldrig, men invitationer skal udløbe efter 7 dage | **Besluttet 14. november 2026:** koden ligger i `invites` med `expires_at`, ikke på gruppen | 1 |
+| 5 | Auth er ikke beskrevet | **Besluttet 14. november 2026:** JWT i httpOnly-cookie (ikke localStorage), adgangskoder med argon2. Nulstilling via e-mail venter på hul 6. Se ADR 0001 | 1 |
 | 6 | Ingen e-mail-udbyder valgt (invitation, nulstilling) | En med gratis niveau, fx Resend eller Brevo | 1 |
-| 7 | Hvad sker der når admin eller sidste medlem forlader gruppen | Næste medlem bliver admin. Går det sidste medlem, slettes gruppen | 1 |
-| 8 | Grænserne (5 medlemmer, 5 grupper, unikt navn) kan omgås af samtidige kald | Tjek i én transaktion med lås. Navne sammenlignes uden forskel på store og små bogstaver | 1 |
+| 7 | Hvad sker der når admin eller sidste medlem forlader gruppen | **Besluttet 14. november 2026:** næste medlem bliver admin. Går det sidste medlem, slettes gruppen | 1 |
+| 8 | Grænserne (10 medlemmer, 5 grupper, unikt navn) kan omgås af samtidige kald | **Besluttet 14. november 2026:** tjek i én transaktion med lås. Navne sammenlignes uden forskel på store og små bogstaver | 1 |
 | 9 | Hvordan ser de andre ændringer på listen | TanStack Query med `refetchInterval` (ca. 10 sek). Ingen websockets i version 1 | 2 |
 | 10 | Afkrydsning ved en fejl kan ikke fortrydes | "Fortryd" i et par sekunder efter afkrydsning | 2 |
 | 11 | `pg_dump` på samme droplet er ikke en rigtig backup | Kopiér også dumpet væk fra serveren (DigitalOcean Spaces eller egen maskine) | 0 |
 | 12 | Tidszone for cron-jobs | UTC eller `Europe/Copenhagen`. Dansk tid passer bedst til butikkernes uger. **Din beslutning** | 3 |
-| 13 | Testopsætning ikke valgt | Vitest, og en rigtig Postgres i Docker til API- og databasetests | 0 |
+| 13 | Testopsætning ikke valgt | Vitest. PGlite indtil Docker er sat op, derefter rigtig Postgres i Docker | 0 |
 | 14 | pg_trgm-indeks bliver ikke brugt til `%` uden den rigtige operatorklasse | `GIN (name_normalized gin_trgm_ops)` | 3 |
 | 15 | 1 GB RAM til Postgres, API og Caddy ved siden af det der kører i dag | Mål forbruget efter fase 0 før vi bygger videre | 0 |
 | 16 | Ingen licens i et offentligt repo betyder "alle rettigheder forbeholdt" | **Besluttet 2. november 2026:** ingen licens. Se afsnit 2 | 0 |
