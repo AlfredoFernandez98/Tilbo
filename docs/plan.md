@@ -17,9 +17,9 @@ Tilbo er en fælles købsliste og tilbudssøgning. Den starter som en app til fa
 - Roller i gruppen: administrator og medlem
 - Man giver selv gruppen et navn, fx "Fernandez-familien"
 - En bruger kan ikke være med i to grupper med samme navn. Andre brugere må gerne have en gruppe med samme navn, da grupperne ikke kan se hinanden
-- Hver gruppe har teknisk et unikt id og en invitationskode
+- Hver gruppe har teknisk et unikt id
 - Hver gruppe har ét postnummer, der bestemmer hvilke butikker og tilbud gruppen ser
-- Invitation med kode eller e-mail, udløber efter 7 dage
+- Invitation via et link med token, udløber efter 7 dage. E-mail kommer senere (hul 6)
 - Ordet "Gruppe" bruges i UI'et indtil videre. Det ligger ét sted i koden, så det kan skiftes (fx til "Kurv")
 
 ### Fælles købsliste (hjertet i appen)
@@ -131,7 +131,7 @@ tilbo/
 │   │   │   │   └── ai/
 │   │   │   ├── jobs/             # import-offers.ts, match-list-items.ts
 │   │   │   ├── db/               # schema.ts, migrations/
-│   │   │   ├── plugins/          # jwt, cors, error-handler
+│   │   │   ├── plugins/          # jwt, error-handler (ingen CORS: samme domæne)
 │   │   │   ├── config.ts         # env-validering med zod
 │   │   │   └── server.ts
 │   │   └── Dockerfile
