@@ -19,7 +19,7 @@ Tilbo is a shared shopping list and offer search. It starts as an app for my fam
 - A user cannot be in two groups with the same name. Other users may have a group with the same name, since groups cannot see each other
 - Every group has a unique technical id
 - Every group has one postal code, which decides which stores and offers the group sees
-- Invitation via a shared link that several people can use, expires after 7 days. Email comes later (hole 6)
+- Invitation via a shared link that several people can use, expires after 7 days. Email comes later (gap 6)
 - The word "Gruppe" is used in the UI for now. It lives in one place in the code, so it can be changed (e.g. to "Kurv")
 
 ### Shared shopping list (the heart of the app)
@@ -68,8 +68,8 @@ Six screens: Offers, Shopping list, Feed, Plan, Group, Settings. Plus login, AI 
 | Backend | Node 24 LTS + TypeScript + Fastify | LTS until 2028. Low RAM use (1 GB droplet), one language with the frontend, good AI SDKs |
 | TypeScript in the API | Node runs `.ts` directly (type stripping), no build step | Fewer tools. Requires `.ts` in imports and no `enum` (`erasableSyntaxOnly`) |
 | Auth | JWT in an httpOnly cookie, passwords with argon2 | See ADR 0001. Decided 14 November 2026 |
-| Test database | PGlite (Postgres 18 in WebAssembly) in tests and locally, until Docker is set up | No Docker yet. Concurrent requests are only tested against real Postgres. Open: Postgres 17 or 18 in production. Decided 14 November 2026 |
-| Tests | Every change that adds or changes behaviour ships with unit tests in the same PR (Vitest) | Proves the code works and keeps `main` deployable. Decided 15 November 2026 |
+| Test database | PGlite (Postgres 18 in WebAssembly) in tests and locally, until Docker is set up | No Docker yet. Concurrent requests are not tested until we move to real Postgres. Open: Postgres 17 or 18 in production. Decided 14 November 2026 |
+| Tests | Every change that adds or changes behaviour ships with unit tests in the same PR (Vitest). API tests call the routes against an in-memory database | Proves the code works and keeps `main` deployable. Decided 15 November 2026 |
 | ORM | Drizzle | Close to SQL, migrations, easy to use tsvector and pg_trgm |
 | Database | PostgreSQL 17 in Docker | Free, everything in one place, easy to move to managed later |
 | Frontend | React + Vite + TanStack Query + TanStack Router + Tailwind + shadcn/ui | Known stack, type-safe routes, simple state |
@@ -125,6 +125,7 @@ tilbo/
 │   │   │   ├── modules/          # one folder per feature
 │   │   │   │   ├── auth/
 │   │   │   │   ├── groups/
+│   │   │   │   ├── health/
 │   │   │   │   ├── invites/
 │   │   │   │   ├── offers/       # sources/tjek.ts, sources/seed.ts
 │   │   │   │   ├── search/
@@ -136,6 +137,7 @@ tilbo/
 │   │   │   ├── jobs/             # import-offers.ts, match-list-items.ts
 │   │   │   ├── db/               # client.ts, schema.ts
 │   │   │   ├── lib/              # small shared helpers
+│   │   │   ├── app.ts            # builds the Fastify app
 │   │   │   ├── config.ts         # env validation with zod
 │   │   │   └── server.ts
 │   │   └── Dockerfile
@@ -160,16 +162,18 @@ tilbo/
 └── README.md
 ```
 
+The tree shows the target layout; some parts are not built yet.
+
 Principle: feature folders, not layers. Everything about groups lives in `modules/groups/`. No CORS: web and API are served from the same domain.
 
 ## 5. Data model
 
 | Table | Important columns | Note |
 | --- | --- | --- |
-| `users` | id, name, email (unique), password_hash, created_at | No postal code (hole 3) |
-| `groups` | id, name, postal_code, created_by, created_at | At most 10 members. The invite code lives in `invites` (hole 4) |
+| `users` | id, name, email (unique), password_hash, created_at | No postal code (gap 3) |
+| `groups` | id, name, postal_code, created_by, created_at | At most 10 members. The invite code lives in `invites` (gap 4) |
 | `group_members` | group_id, user_id, role (`admin`/`member`), joined_at | PK (group_id, user_id). At most 5 groups per user. No two groups with the same name for the same user |
-| `invites` | id, group_id, token_hash, created_by, expires_at | Shared link: can be used by several people until it expires (7 days) or the group has 10 members. Only the sha256 hash of the token is stored. Decided 14 November 2026 |
+| `invites` | id, group_id, token_hash, created_by, expires_at, created_at | Shared link: can be used by several people until it expires (7 days) or the group has 10 members. Only the sha256 hash of the token is stored. Decided 14 November 2026 |
 | `stores` | id, name, chain, source_dealer_id | |
 | `offers` | id, source, source_offer_id, name, name_normalized, price, normal_price, unit, quantity, store_id, valid_from, valid_to, image_url, category, search_vector, imported_at | Unique (source, source_offer_id). GIN on search_vector and name_normalized |
 | `shopping_lists` | id, group_id, name | One per group |
@@ -203,7 +207,7 @@ Matching the shopping list to offers: normalise names (lower case, remove quanti
 
 | Phase | Content | Done when |
 | --- | --- | --- |
-| 0. Foundation | Monorepo, CI, hello world, local database (PGlite) | The API can connect to the local database |
+| 0. Foundation (done) | Monorepo, CI, hello world, local database (PGlite) | The API can connect to the local database |
 | 1. Auth and groups | Signup, login, JWT, profile, create group, invitation | Two users are in the same group |
 | 2. Shopping list and deploy | Shared list, notes, dates, who added, check-off. Dockerfiles, Caddy, droplet, deploy workflow, backup and RAM measurement | The family can use the list at `https://tilbo.alfredofernandez.dk` |
 | 3. Offers and search | Seed, Tjek adapter, nightly job, search with filters, detail panel | You can search "skyr" and see real offers |
@@ -218,25 +222,25 @@ Matching the shopping list to offers: normalise names (lower case, remove quanti
 - Whether "Gruppe" should be called something else in the UI
 - Check whether `tilbo.dk`, the app name and the trademark are free
 - Postgres 17 or 18 in production (PGlite runs 18)
-- Whether an item's name and note can be edited after it is added (the API allows it, the plan did not mention it)
-- The holes in section 9
+- Whether an item's name and note can be edited after it is added. The API allows it; section 1 does not mention it
+- The gaps in section 9
 
-## 9. Holes and recommendations
+## 9. Gaps and recommendations
 
 Found 2 November 2026. Recommendations, not decisions yet. When a point is decided, it moves into the section it belongs to (and maybe an ADR).
 
-| # | Hole | Recommendation | At the latest in phase |
+| # | Gap | Recommendation | At the latest in phase |
 | --- | --- | --- | --- |
 | 1 | Tjek `/offers/search` requires a search term, so the nightly job cannot fetch all offers for an area. The API is not official | Find an endpoint that lists offers for an area. Read their terms | 3 |
 | 2 | Tjek needs lat/lng, the group has a postal code | Static table of postal codes and their centre in `packages/shared` | 3 |
 | 3 | Both `users` and `groups` have a postal code | **Decided 14 November 2026:** only on the group | 1 |
 | 4 | `groups.invite_code` never expires, but invitations must expire after 7 days | **Decided 14 November 2026:** the code lives in `invites` with `expires_at`, not on the group | 1 |
-| 5 | Auth is not described | **Decided 14 November 2026:** JWT in an httpOnly cookie (not localStorage), passwords with argon2. Password reset by email waits for hole 6. See ADR 0001 | 1 |
+| 5 | Auth is not described | **Decided 14 November 2026:** JWT in an httpOnly cookie (not localStorage), passwords with argon2. Password reset by email waits for gap 6. See ADR 0001 | 1 |
 | 6 | No email provider chosen (invitation, password reset) | One with a free tier, e.g. Resend or Brevo | 1 |
 | 7 | What happens when the admin or the last member leaves the group | **Decided 14 November 2026:** the next member becomes admin. If the last member leaves, the group is deleted | 1 |
 | 8 | The limits (10 members, 5 groups, unique name) can be bypassed by concurrent requests | **Decided 14 November 2026:** check in one transaction with a lock. Names are compared case-insensitively | 1 |
 | 9 | How do others see changes to the list | TanStack Query with `refetchInterval` (about 10 s). No websockets in version 1 | 2 |
-| 10 | Checking off by mistake cannot be undone | "Undo" for a few seconds after checking off | 2 |
+| 10 | Checking off by mistake cannot be undone | **Decided 14 November 2026:** unchecking undoes it (in the API). The UI shows "Undo" for a few seconds after checking off | 2 |
 | 11 | `pg_dump` on the same droplet is not a real backup | Also copy the dump off the server (DigitalOcean Spaces or my own machine) | 2 |
 | 12 | Time zone for cron jobs | UTC or `Europe/Copenhagen`. Danish time fits the stores' weeks best. **My decision** | 3 |
 | 13 | Test setup not chosen | **Decided 14 November 2026:** Vitest. PGlite until Docker is set up, then real Postgres in Docker | 0 |
@@ -276,19 +280,19 @@ Created 3 November 2026. Things that must be included, but are not planned in a 
 
 ## 11. Status
 
-Updated 15 November 2026. Current phase: **1. Auth and groups** (backend done, frontend not started).
+Updated 15 November 2026. Current phase: **1. Auth and groups** (core backend done, frontend not started).
 
-Done in phase 0:
+Phase 0 done 15 November 2026, except turning on Dependabot alerts and security updates in GitHub:
 
-- Monorepo, API (Fastify, `/health`) and web (Vite, React, TanStack Query)
-- CI with `check` and `gitleaks`, `concurrency` and timeouts
+- Monorepo, API (Fastify, `/api/health`) and web (Vite, React, TanStack Query)
+- CI with `check` and `gitleaks`, `concurrency` and timeouts. Does not run twice on PR branches
 - Ruleset on `main`: requires a PR, squash-merge only, blocks force-push and deletion, requires `check` and `gitleaks`
 - gitleaks as a pre-commit hook (`.githooks`). Secret scanning and push protection are on
-- Dependabot every week for npm and Actions
+- Dependabot every week for npm and Actions. Ignores major versions of `@types/node`. All open updates are merged
 - PR template and PR rules (`.github/pull_request_template.md`)
 - Drizzle and a local database (PGlite). `/api/health` checks the database
 
-Done in the backend (phases 1 and 2):
+Done in the backend so far (phases 1 and 2):
 
 - Signup, login, logout and "me" with an httpOnly cookie (ADR 0001)
 - Create and list groups, invitation link and join, leave a group with admin hand-over
@@ -299,15 +303,11 @@ Next:
 
 1. Backend: list members, edit group name and postal code, remove a member (admin), edit profile
 2. Frontend: signup and login, groups and invitation, shopping list
-3. Offer search (phase 3), when hole 1 is solved
-
-Still open in phase 0:
-
-- Turn on Dependabot alerts and security updates in GitHub
+3. Offer search (phase 3), when gap 1 is solved
 
 Moved to phase 2 (decided 14 November 2026: we build the app first and deploy before the family needs it):
 
 - Dockerfiles, Caddy, droplet and deploy workflow (`deploy.yml`). An untested API Dockerfile is on the branch `feat/api-dockerfile`
-- `docker-compose.yml` with Postgres and Vitest against real Postgres (hole 13)
-- Backup off the server (hole 11) and RAM measurement (hole 15)
+- `docker-compose.yml` with Postgres and Vitest against real Postgres (gap 13)
+- Backup off the server (gap 11) and RAM measurement (gap 15)
 - Rate limiting on login and signup, node-postgres instead of PGlite, the Dockerfile must copy `apps/api/drizzle`
