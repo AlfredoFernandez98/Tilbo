@@ -20,6 +20,7 @@ Tilbo is a shared shopping list and offer search. It starts as an app for my fam
 - Every group has a unique technical id
 - Every group has one postal code, which decides which stores and offers the group sees
 - Invitation via a shared link that several people can use, expires after 7 days. Email comes later (gap 6)
+- An admin can remove other members. This revokes the group's invite links, so the removed member cannot rejoin with an old link. Decided 15 November 2026
 - The word "Gruppe" is used in the UI for now. It lives in one place in the code, so it can be changed (e.g. to "Kurv")
 
 ### Shared shopping list (the heart of the app)

@@ -15,9 +15,12 @@ export {
   groupResponseSchema,
   acceptInviteBodySchema,
   inviteResponseSchema,
+  memberParamsSchema,
+  memberResponseSchema,
   type CreateGroupBody,
   type GroupResponse,
   type InviteResponse,
+  type MemberResponse,
 } from "./groups.ts";
 export {
   createItemBodySchema,
