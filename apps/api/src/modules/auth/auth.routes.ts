@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
 import { eq, sql } from "drizzle-orm";
 import { hash, verify } from "@node-rs/argon2";
-import { loginBodySchema, signupBodySchema, type UserResponse } from "@tilbo/shared";
+import { loginBodySchema, signupBodySchema, updateProfileBodySchema, type UserResponse } from "@tilbo/shared";
 import { users } from "../../db/schema.ts";
 import { parse } from "../../lib/validate.ts";
 
@@ -62,6 +62,13 @@ export async function authRoutes(app: FastifyInstance) {
   app.get("/api/auth/me", { onRequest: [app.authenticate] }, async (req, reply) => {
     const [user] = await app.db.select().from(users).where(eq(users.id, req.user.sub));
     // A valid token for a deleted user is treated as logged out.
+    if (!user) return reply.code(401).send({ error: "unauthorized" });
+    return toUser(user);
+  });
+
+  app.patch("/api/auth/me", { onRequest: [app.authenticate] }, async (req, reply) => {
+    const body = parse(updateProfileBodySchema, req.body);
+    const [user] = await app.db.update(users).set(body).where(eq(users.id, req.user.sub)).returning();
     if (!user) return reply.code(401).send({ error: "unauthorized" });
     return toUser(user);
   });

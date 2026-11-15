@@ -3,9 +3,11 @@ export { healthResponseSchema, type HealthResponse } from "./health.ts";
 export {
   loginBodySchema,
   signupBodySchema,
+  updateProfileBodySchema,
   userResponseSchema,
   type LoginBody,
   type SignupBody,
+  type UpdateProfileBody,
   type UserResponse,
 } from "./auth.ts";
 export {

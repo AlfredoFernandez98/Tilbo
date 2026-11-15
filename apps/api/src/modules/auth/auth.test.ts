@@ -5,6 +5,7 @@ import { userResponseSchema } from "@tilbo/shared";
 import { buildApp } from "../../app.ts";
 import { createTestDb } from "../../db/client.ts";
 import { createTestApp, testConfig } from "../../test-utils.ts";
+import { users } from "../../db/schema.ts";
 import { AUTH_COOKIE } from "./auth.routes.ts";
 
 let app: FastifyInstance;
@@ -73,6 +74,39 @@ describe("auth", () => {
     expect((await app.inject({ method: "GET", url: "/api/auth/me" })).statusCode).toBe(401);
     const forged = await app.inject({ method: "GET", url: "/api/auth/me", cookies: { [AUTH_COOKIE]: "forged" } });
     expect(forged.statusCode).toBe(401);
+  });
+
+  it("updates the user's own name and trims it", async () => {
+    const cookies = { [AUTH_COOKIE]: sessionCookie(await signup())!.value };
+    const res = await app.inject({ method: "PATCH", url: "/api/auth/me", cookies, payload: { name: "  Anna B  " } });
+
+    expect(res.statusCode).toBe(200);
+    expect(userResponseSchema.parse(res.json())).toMatchObject({ name: "Anna B", email: "anna@example.com" });
+    expect((await app.inject({ method: "GET", url: "/api/auth/me", cookies })).json().name).toBe("Anna B");
+  });
+
+  it("rejects an empty name and ignores other fields like email", async () => {
+    const cookies = { [AUTH_COOKIE]: sessionCookie(await signup())!.value };
+    const patch = (payload: object) => app.inject({ method: "PATCH", url: "/api/auth/me", cookies, payload });
+
+    expect((await patch({ name: " " })).statusCode).toBe(400);
+    expect((await patch({ email: "eve@example.com" })).statusCode).toBe(400);
+    const res = await patch({ name: "Anna", email: "eve@example.com", password: "new password 123" });
+    expect(res.json().email).toBe("anna@example.com");
+    expect((await login("anna@example.com", "correct horse")).statusCode).toBe(200);
+  });
+
+  it("treats a valid token for a deleted user as logged out on update", async () => {
+    const cookies = { [AUTH_COOKIE]: sessionCookie(await signup())!.value };
+    await app.db.delete(users);
+    const res = await app.inject({ method: "PATCH", url: "/api/auth/me", cookies, payload: { name: "Ghost" } });
+
+    expect(res.statusCode).toBe(401);
+  });
+
+  it("requires login to update the profile", async () => {
+    const res = await app.inject({ method: "PATCH", url: "/api/auth/me", payload: { name: "Eve" } });
+    expect(res.statusCode).toBe(401);
   });
 
   it("clears the cookie on logout", async () => {
