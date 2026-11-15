@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { and, asc, eq } from "drizzle-orm";
 import { groupIdParamsSchema, memberParamsSchema, type MemberResponse } from "@tilbo/shared";
-import { groupMembers, groups, users } from "../../db/schema.ts";
+import { groupMembers, groups, invites, users } from "../../db/schema.ts";
 import { HttpError } from "../../lib/http-error.ts";
 import { parse } from "../../lib/validate.ts";
 import { getRole } from "./membership.ts";
@@ -23,7 +23,7 @@ export async function membersRoutes(app: FastifyInstance) {
     return rows.map((r) => ({ ...r, joinedAt: r.joinedAt.toISOString() }));
   });
 
-  // An admin removes another member. Leaving yourself is DELETE .../members/me (admin hand-over lives there).
+  // An admin removes another member and revokes the group's invite links. Leaving yourself is DELETE .../members/me (admin hand-over lives there).
   app.delete("/api/groups/:groupId/members/:userId", async (req, reply) => {
     const { groupId, userId } = parse(memberParamsSchema, req.params);
     if (userId === req.user.sub) throw new HttpError(400, "use_leave");
@@ -40,6 +40,8 @@ export async function membersRoutes(app: FastifyInstance) {
         .where(and(eq(groupMembers.groupId, groupId), eq(groupMembers.userId, userId)))
         .returning({ userId: groupMembers.userId });
       if (removed.length === 0) throw new HttpError(404, "member_not_found");
+      // Invite links are shared and reusable, so the removed member could rejoin with theirs. Revoke them all.
+      await tx.delete(invites).where(eq(invites.groupId, groupId));
     });
     return reply.code(204).send();
   });
