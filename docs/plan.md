@@ -1,103 +1,105 @@
 # Tilbo: plan
 
-Sidst opdateret: 14. november 2026
+Last updated: 15 November 2026
 
-Tilbo er en fælles købsliste og tilbudssøgning. Den starter som en app til familien, men er bygget så flere grupper kan komme til, og så den kan udgives som rigtig app senere.
+Tilbo is a shared shopping list and offer search. It starts as an app for my family, but is built so more groups can join, and so it can be published as a real app later.
 
-## 1. Hvad appen skal kunne
+## 1. What the app must do
 
-### Brugere og grupper
+### Users and groups
 
-- Hver bruger har sin egen profil: navn, e-mail, adgangskode
-- En gruppe har 1-10 medlemmer. Invitationer stoppes, når gruppen er fuld
-- En bruger kan være med i maks 5 grupper
-- Grupper er helt lukkede: er du i gruppe 1, kan du ikke se noget fra gruppe 2 (lister, noter, søgninger, medlemmer, feed)
-- Man skifter mellem sine grupper i appen og ser kun den valgte gruppe
-- Reglerne håndhæves i backend, ikke kun i frontend
-- Roller i gruppen: administrator og medlem
-- Man giver selv gruppen et navn, fx "Fernandez-familien"
-- En bruger kan ikke være med i to grupper med samme navn. Andre brugere må gerne have en gruppe med samme navn, da grupperne ikke kan se hinanden
-- Hver gruppe har teknisk et unikt id
-- Hver gruppe har ét postnummer, der bestemmer hvilke butikker og tilbud gruppen ser
-- Invitation via et delt link, som flere kan bruge, udløber efter 7 dage. E-mail kommer senere (hul 6)
-- Ordet "Gruppe" bruges i UI'et indtil videre. Det ligger ét sted i koden, så det kan skiftes (fx til "Kurv")
+- Every user has their own profile: name, email, password
+- A group has 1-10 members. Invitations stop when the group is full
+- A user can be in at most 5 groups
+- Groups are fully closed: if you are in group 1, you cannot see anything from group 2 (lists, notes, searches, members, feed)
+- You switch between your groups in the app and only see the selected group
+- The rules are enforced in the backend, not only in the frontend
+- Roles in a group: admin and member
+- You name the group yourself, e.g. "Home"
+- A user cannot be in two groups with the same name. Other users may have a group with the same name, since groups cannot see each other
+- Every group has a unique technical id
+- Every group has one postal code, which decides which stores and offers the group sees
+- Invitation via a shared link that several people can use, expires after 7 days. Email comes later (hole 6)
+- The word "Gruppe" is used in the UI for now. It lives in one place in the code, so it can be changed (e.g. to "Kurv")
 
-### Fælles købsliste (hjertet i appen)
+### Shared shopping list (the heart of the app)
 
-- Én fælles liste pr. gruppe, så alle kan se hvad der mangler
-- Hver vare kan have en kort note, fx "den laktosefri" eller "2 stk"
-- Hver vare viser hvem der tilføjede den, og hvornår (dato)
-- Når en vare er købt, krydses den af. Det gemmes hvem der købte den og hvornår
-- Afkrydsede varer forsvinder fra listen
-- Er en vare på tilbud et sted, vises det ved siden af
+- One shared list per group, so everyone can see what is missing
+- Each item can have a short note, e.g. "the lactose-free one" or "2 pcs"
+- Each item shows who added it, and when (date)
+- When an item is bought, it is checked off. Who bought it and when is stored
+- Checked items disappear from the list
+- If an item is on offer somewhere, it is shown next to it
 
-### Tilbud og søgning
+### Offers and search
 
-- Søg i ugens tilbud med fritekst
-- Filtrer på butik og kategori
-- Panel med detaljer om et tilbud: pris, normalpris, butik, gyldig til
-- Tilbud vises ud fra gruppens postnummer
+- Search this week's offers with free text
+- Filter by store and category
+- Panel with offer details: price, normal price, store, valid until
+- Offers are shown based on the group's postal code
 
 ### Feed
 
-- Viser hvad de andre i gruppen har tilføjet, købt og søgt på
-- Kun inden for den valgte gruppe
-- Man bestemmer selv om ens søgninger vises (delt/privat)
+- Shows what the others in the group have added, bought and searched for
+- Only within the selected group
+- You decide yourself whether your searches are shown (shared/private)
 
-### Senere
+### Later
 
-- Notifikationer: vare på listen kommer på tilbud, nye varer på listen
-- AI-panel og ugentlig plan med billigste butiksfordeling og besparelse
+- Notifications: an item on the list goes on offer, new items on the list
+- AI panel and weekly plan with the cheapest split across stores and savings
 
-### Skærme
+### Screens
 
-Seks skærme: Tilbud, Købsliste, Feed, Plan, Gruppe, Indstillinger. Plus login, AI-panel og tilbudsdetalje-panel. Sidebar på desktop, bundfaner på mobil.
+Six screens: Offers, Shopping list, Feed, Plan, Group, Settings. Plus login, AI panel and offer detail panel. Sidebar on desktop, bottom tabs on mobile.
 
-### Rækkefølge
+### Order
 
-| Version | Indhold |
+| Version | Content |
 | --- | --- |
-| 1 | Login, profil, grupper med invitation, fælles købsliste med noter, datoer og afkrydsning, tilbudssøgning |
-| 2 | Feed, delingsregler, match mellem liste og tilbud, notifikationer |
-| 3 | AI-panel og ugentlig plan |
+| 1 | Login, profile, groups with invitation, shared shopping list with notes, dates and check-off, offer search |
+| 2 | Feed, sharing rules, match between list and offers, notifications |
+| 3 | AI panel and weekly plan |
 
-## 2. Tekniske beslutninger
+## 2. Technical decisions
 
-| Område | Valg | Hvorfor |
+| Area | Choice | Why |
 | --- | --- | --- |
-| Backend | Node 24 LTS + TypeScript + Fastify | LTS til 2028. Lavt RAM-forbrug (1 GB droplet), ét sprog med frontend, gode AI-SDK'er |
-| TypeScript i API | Node kører `.ts` direkte (type stripping), intet build-trin | Færre værktøjer. Kræver `.ts` i imports og ingen `enum` (`erasableSyntaxOnly`) |
-| Auth | JWT i httpOnly-cookie, adgangskoder med argon2 | Se ADR 0001. Besluttet 14. november 2026 |
-| Test-database | PGlite (Postgres 18 i WebAssembly) i tests og lokalt, indtil Docker sættes op | Ingen Docker endnu. Samtidige kald testes først mod rigtig Postgres. Åbent: Postgres 17 eller 18 i produktion. Besluttet 14. november 2026 |
-| ORM | Drizzle | Tæt på SQL, migrations, nemt at bruge tsvector og pg_trgm |
-| Database | PostgreSQL 17 i Docker | Gratis, alt ét sted, nemt at flytte til managed senere |
-| Frontend | React + Vite + TanStack Query + TanStack Router + Tailwind + shadcn/ui | Kendt stack, typesikre routes, simpel state |
-| Client-state | Zustand (kun til valgt gruppe, åbne paneler, filtre) | Lille og simpel |
-| Repo | Ét monorepo med pnpm workspaces, uden Turborepo | Én udvikler, delte typer ét sted |
-| Jobs | node-cron i API-processen | Ingen Redis eller worker nødvendig endnu |
-| Hosting | Docker Compose på DigitalOcean droplet | Bruger den server der allerede findes |
-| Proxy og HTTPS | Caddy | Automatisk Let's Encrypt |
-| Deploy | GitHub Actions bygger images til GHCR og deployer via SSH | Ingen overhead på serveren (ikke Coolify/Dokploy) |
-| Ikke valgt | Java/Spring Boot, Next.js, NestJS, Prisma | For tungt eller passer dårligt til nat-jobs og søgning |
-| Licens | Ingen (alle rettigheder forbeholdt) | Koden kan læses i CV'et, men ikke kopieres, hvis appen udgives. MIT kan tilføjes senere |
-| Git og PR'er | Feature-branches og PR til `main`, kun squash-merge, Conventional Commits. Commits og PR-tekst på engelsk. Skabelon i `.github/pull_request_template.md` | `main` er altid deploybar, og historikken er læsbar i CV'et. Reglerne står i `.claude/rules/git.md`. Besluttet 14. november 2026 |
+| Backend | Node 24 LTS + TypeScript + Fastify | LTS until 2028. Low RAM use (1 GB droplet), one language with the frontend, good AI SDKs |
+| TypeScript in the API | Node runs `.ts` directly (type stripping), no build step | Fewer tools. Requires `.ts` in imports and no `enum` (`erasableSyntaxOnly`) |
+| Auth | JWT in an httpOnly cookie, passwords with argon2 | See ADR 0001. Decided 14 November 2026 |
+| Test database | PGlite (Postgres 18 in WebAssembly) in tests and locally, until Docker is set up | No Docker yet. Concurrent requests are only tested against real Postgres. Open: Postgres 17 or 18 in production. Decided 14 November 2026 |
+| Tests | Every change that adds or changes behaviour ships with unit tests in the same PR (Vitest) | Proves the code works and keeps `main` deployable. Decided 15 November 2026 |
+| ORM | Drizzle | Close to SQL, migrations, easy to use tsvector and pg_trgm |
+| Database | PostgreSQL 17 in Docker | Free, everything in one place, easy to move to managed later |
+| Frontend | React + Vite + TanStack Query + TanStack Router + Tailwind + shadcn/ui | Known stack, type-safe routes, simple state |
+| Client state | Zustand (only for selected group, open panels, filters) | Small and simple |
+| Repo | One monorepo with pnpm workspaces, without Turborepo | One developer, shared types in one place |
+| Jobs | node-cron in the API process | No Redis or worker needed yet |
+| Hosting | Docker Compose on a DigitalOcean droplet | Uses the server that already exists |
+| Proxy and HTTPS | Caddy | Automatic Let's Encrypt |
+| Deploy | GitHub Actions builds images to GHCR and deploys via SSH | No overhead on the server (not Coolify/Dokploy) |
+| Not chosen | Java/Spring Boot, Next.js, NestJS, Prisma | Too heavy or a poor fit for nightly jobs and search |
+| License | None (all rights reserved) | The code can be read as part of my CV, but not copied, if the app is published. MIT can be added later |
+| Git and PRs | Feature branches and PRs to `main`, squash-merge only, Conventional Commits, at most about 350 changed lines of code per PR. Template in `.github/pull_request_template.md` | `main` is always deployable, and the history is readable. Decided 14 November 2026 |
+| Language | Everything in the repo and on GitHub is in English. UI text is Danish | The repo is public; the users are Danish. Decided 14 November 2026 |
 
-## 3. Datakilder
+## 3. Data sources
 
-| Kilde | Status | Brug |
+| Source | Status | Use |
 | --- | --- | --- |
-| Tjek / eTilbudsavis API (`squid-api.tjek.com/v2/offers/search`) | Gratis, ingen nøgle, ikke officielt dokumenteret | Første kilde. Hent én gang om dagen pr. område og cache |
-| Salling Group API | Gratis nøgle, officielt | Kun madspild-tilbud. Evt. senere |
-| Tilbudsdata.dk API | Betalt B2B, kræver aftale | Mail sendes senere med spørgsmål om hobbyadgang. Testnøglen bruges ikke i appen |
-| Seed-data | Egne eksempeltilbud | Udvikling og tests |
+| Tjek / eTilbudsavis API (`squid-api.tjek.com/v2/offers/search`) | Free, no key, not officially documented | First source. Fetch once a day per area and cache |
+| Salling Group API | Free key, official | Only food-waste offers. Maybe later |
+| Tilbudsdata.dk API | Paid B2B, requires an agreement | An email asking about hobby access is sent later. The test key is not used in the app |
+| Seed data | Own example offers | Development and tests |
 
-Eksempel på kald til Tjek:
+Example call to Tjek:
 
 ```
 GET https://squid-api.tjek.com/v2/offers/search?query=skyr&r_lat=55.69&r_lng=12.55&r_radius=20000&r_locale=da_DK&limit=24&offset=0
 ```
 
-Alle kilder bag samme interface, så de kan skiftes:
+All sources behind the same interface, so they can be swapped:
 
 ```ts
 interface OfferSource {
@@ -112,16 +114,18 @@ type NormalizedOffer = {
 };
 ```
 
-## 4. Repo-struktur
+## 4. Repo structure
 
 ```
 tilbo/
 ├── apps/
-│   ├── api/                      # Fastify-backend
+│   ├── api/                      # Fastify backend
+│   │   ├── drizzle/              # generated SQL migrations
 │   │   ├── src/
-│   │   │   ├── modules/          # én mappe pr. feature
+│   │   │   ├── modules/          # one folder per feature
 │   │   │   │   ├── auth/
 │   │   │   │   ├── groups/
+│   │   │   │   ├── invites/
 │   │   │   │   ├── offers/       # sources/tjek.ts, sources/seed.ts
 │   │   │   │   ├── search/
 │   │   │   │   ├── shopping-list/
@@ -130,166 +134,180 @@ tilbo/
 │   │   │   │   ├── notifications/
 │   │   │   │   └── ai/
 │   │   │   ├── jobs/             # import-offers.ts, match-list-items.ts
-│   │   │   ├── db/               # schema.ts, migrations/
-│   │   │   ├── plugins/          # jwt, error-handler (ingen CORS: samme domæne)
-│   │   │   ├── config.ts         # env-validering med zod
+│   │   │   ├── db/               # client.ts, schema.ts
+│   │   │   ├── lib/              # small shared helpers
+│   │   │   ├── config.ts         # env validation with zod
 │   │   │   └── server.ts
 │   │   └── Dockerfile
 │   └── web/                      # React + Vite
 │       ├── src/
-│       │   ├── features/         # samme navne som api/modules
+│       │   ├── features/         # same names as api/modules
 │       │   ├── components/ui/    # shadcn/ui
-│       │   ├── layouts/          # AppShell: sidebar / bundfaner
-│       │   ├── lib/              # api-klient, query-client
+│       │   ├── layouts/          # AppShell: sidebar / bottom tabs
+│       │   ├── lib/              # API client, query client
 │       │   └── routes/           # TanStack Router
 │       └── Dockerfile
 ├── packages/
-│   └── shared/                   # typer og zod-skemaer delt af api og web
+│   └── shared/                   # types and zod schemas shared by api and web
 ├── docs/
 │   ├── plan.md
-│   └── adr/                      # én kort fil pr. stor beslutning
+│   └── adr/                      # one short file per major decision
 ├── .github/workflows/            # ci.yml, deploy.yml
-├── docker-compose.yml            # lokal udvikling
-├── docker-compose.prod.yml       # på serveren
+├── docker-compose.yml            # local development
+├── docker-compose.prod.yml       # on the server
 ├── Caddyfile
 ├── .env.example
-├── CLAUDE.md
 └── README.md
 ```
 
-Princip: feature-mapper, ikke lag. Alt om grupper ligger i `modules/groups/`.
+Principle: feature folders, not layers. Everything about groups lives in `modules/groups/`. No CORS: web and API are served from the same domain.
 
-## 5. Datamodel
+## 5. Data model
 
-| Tabel | Vigtige kolonner | Bemærk |
+| Table | Important columns | Note |
 | --- | --- | --- |
-| `users` | id, name, email (unik), password_hash, created_at | Intet postnummer (hul 3) |
-| `groups` | id, name, postal_code, created_by, created_at | Maks 10 medlemmer. Invitationskoden ligger i `invites` (hul 4) |
-| `group_members` | group_id, user_id, role (`admin`/`member`), joined_at | PK (group_id, user_id). Maks 5 grupper pr. bruger. Ingen to grupper med samme navn for samme bruger |
-| `invites` | id, group_id, token_hash, created_by, expires_at | Delt link: kan bruges af flere, indtil det udløber (7 dage) eller gruppen har 10 medlemmer. Kun sha256-hash af tokenet gemmes. Besluttet 14. november 2026 |
+| `users` | id, name, email (unique), password_hash, created_at | No postal code (hole 3) |
+| `groups` | id, name, postal_code, created_by, created_at | At most 10 members. The invite code lives in `invites` (hole 4) |
+| `group_members` | group_id, user_id, role (`admin`/`member`), joined_at | PK (group_id, user_id). At most 5 groups per user. No two groups with the same name for the same user |
+| `invites` | id, group_id, token_hash, created_by, expires_at | Shared link: can be used by several people until it expires (7 days) or the group has 10 members. Only the sha256 hash of the token is stored. Decided 14 November 2026 |
 | `stores` | id, name, chain, source_dealer_id | |
-| `offers` | id, source, source_offer_id, name, name_normalized, price, normal_price, unit, quantity, store_id, valid_from, valid_to, image_url, category, search_vector, imported_at | Unik (source, source_offer_id). GIN på search_vector og name_normalized |
-| `shopping_lists` | id, group_id, name | Én pr. gruppe |
-| `list_items` | id, list_id, name, name_normalized, note, quantity, added_by, added_at, checked_by, checked_at, matched_offer_id, match_score | Afkrydsede vises ikke på listen |
-| `searches` | id, user_id, group_id, query, store_filter, category_filter, is_shared, created_at | Bruges til feed |
+| `offers` | id, source, source_offer_id, name, name_normalized, price, normal_price, unit, quantity, store_id, valid_from, valid_to, image_url, category, search_vector, imported_at | Unique (source, source_offer_id). GIN on search_vector and name_normalized |
+| `shopping_lists` | id, group_id, name | One per group |
+| `list_items` | id, list_id, name, name_normalized, note, quantity, added_by, added_at, checked_by, checked_at, matched_offer_id, match_score | Checked items are not shown on the list. `name_normalized`, `quantity` and the match columns come in phase 4 |
+| `searches` | id, user_id, group_id, query, store_filter, category_filter, is_shared, created_at | Used for the feed |
 | `sharing_settings` | user_id, group_id, share_searches, visible_in_feed | PK (user_id, group_id) |
 | `notifications` | id, user_id, group_id, type, payload, read_at, sent_at, created_at | Version 2 |
 
-Søgning i Postgres:
+Search in Postgres:
 
 - `CREATE EXTENSION pg_trgm;`
-- `search_vector` = `to_tsvector('danish', name)` som generated column
-- Fritekst: `search_vector @@ plainto_tsquery('danish', $1)`
-- Stavefejl: `name_normalized % $1 ORDER BY similarity(...) DESC`
+- `search_vector` = `to_tsvector('danish', name)` as a generated column
+- Free text: `search_vector @@ plainto_tsquery('danish', $1)`
+- Typos: `name_normalized % $1 ORDER BY similarity(...) DESC`
 
-Matching af købsliste til tilbud: normaliser navne (små bogstaver, fjern mængder), find aktive tilbud med `similarity > 0.35`, vælg det billigste med højest score.
+Matching the shopping list to offers: normalise names (lower case, remove quantities), find active offers with `similarity > 0.35`, pick the cheapest with the highest score.
 
 ## 6. Hosting
 
 - Server: DigitalOcean droplet "web", Frankfurt, 1 GB RAM, 25 GB disk
-- Domæne: alfredofernandez.dk (DNS hos DigitalOcean)
-- App-adresse: `tilbo.alfredofernandez.dk` (A-record `tilbo` til droplet'ens IP)
-- Byg images i GitHub Actions, ikke på serveren
-- Swap-fil på 2 GB som sikkerhedsnet
-- Resize kun CPU/RAM til 2 GB hvis det bliver for stramt (ikke disken)
-- Backup: `pg_dump` hver nat via cron, gem 14 dage
-- Sikkerhed: ufw (kun 22, 80, 443), SSH kun med nøgle, `.env` aldrig i git, fail2ban, unattended-upgrades
-- Før opsætning: tjek hvad der allerede kører på droplet'en (port 80/443)
+- Domain: alfredofernandez.dk (DNS at DigitalOcean)
+- App address: `tilbo.alfredofernandez.dk` (A record `tilbo` to the droplet's IP)
+- Build images in GitHub Actions, not on the server
+- 2 GB swap file as a safety net
+- Only resize CPU/RAM to 2 GB if it gets too tight (not the disk)
+- Backup: `pg_dump` every night via cron, keep 14 days
+- Security: ufw (only 22, 80, 443), SSH with key only, `.env` never in git, fail2ban, unattended-upgrades
+- Before setup: check what already runs on the droplet (ports 80/443)
 
-## 7. Faser
+## 7. Phases
 
-| Fase | Indhold | Færdig når |
+| Phase | Content | Done when |
 | --- | --- | --- |
-| 0. Fundament | Monorepo, CI, hello world, lokal database (PGlite) | API'et kan forbinde til den lokale database |
-| 1. Auth og grupper | Signup, login, JWT, profil, opret gruppe, invitation | To brugere er i samme gruppe |
-| 2. Købsliste og deploy | Fælles liste, noter, datoer, hvem tilføjede, afkryds. Dockerfiles, Caddy, droplet, deploy-workflow, backup og RAM-måling | Familien kan bruge listen på `https://tilbo.alfredofernandez.dk` |
-| 3. Tilbud og søgning | Seed, Tjek-adapter, nat-job, søg med filtre, detaljepanel | Man kan søge "skyr" og se rigtige tilbud |
-| 4. Feed og match | Feed, delingsregler, match liste til tilbud | Listen viser hvor varen er billigst |
-| 5. Notifikationer | In-app og e-mail | Mail når en vare kommer på tilbud |
-| 6. AI | Butiksfordeling, besparelse, fritekst, ugentlig plan | AI-panelet svarer |
+| 0. Foundation | Monorepo, CI, hello world, local database (PGlite) | The API can connect to the local database |
+| 1. Auth and groups | Signup, login, JWT, profile, create group, invitation | Two users are in the same group |
+| 2. Shopping list and deploy | Shared list, notes, dates, who added, check-off. Dockerfiles, Caddy, droplet, deploy workflow, backup and RAM measurement | The family can use the list at `https://tilbo.alfredofernandez.dk` |
+| 3. Offers and search | Seed, Tjek adapter, nightly job, search with filters, detail panel | You can search "skyr" and see real offers |
+| 4. Feed and match | Feed, sharing rules, match list to offers | The list shows where the item is cheapest |
+| 5. Notifications | In-app and email | Email when an item goes on offer |
+| 6. AI | Store split, savings, free text, weekly plan | The AI panel answers |
 
-## 8. Åbne punkter
+## 8. Open points
 
-- Hvad hver skærm viser i detaljer
-- Mail til Tilbudsdata om hobbyadgang
-- Om "Gruppe" skal hedde noget andet i UI'et
-- Tjek om `tilbo.dk`, app-navnet og varemærket er ledige
-- Hullerne i afsnit 9
+- What each screen shows in detail
+- Email to Tilbudsdata about hobby access
+- Whether "Gruppe" should be called something else in the UI
+- Check whether `tilbo.dk`, the app name and the trademark are free
+- Postgres 17 or 18 in production (PGlite runs 18)
+- Whether an item's name and note can be edited after it is added (the API allows it, the plan did not mention it)
+- The holes in section 9
 
-## 9. Huller og anbefalinger
+## 9. Holes and recommendations
 
-Fundet 2. november 2026. Anbefalinger, ikke beslutninger endnu. Når et punkt er besluttet, flyttes det ind i det afsnit det hører til (og evt. en ADR).
+Found 2 November 2026. Recommendations, not decisions yet. When a point is decided, it moves into the section it belongs to (and maybe an ADR).
 
-| # | Hul | Anbefaling | Senest i fase |
+| # | Hole | Recommendation | At the latest in phase |
 | --- | --- | --- | --- |
-| 1 | Tjek `/offers/search` kræver et søgeord, så natjobbet kan ikke hente alle tilbud for et område. API'et er ikke officielt | Find et endpoint der lister tilbud for et område. Læs deres vilkår | 3 |
-| 2 | Tjek skal bruge lat/lng, gruppen har et postnummer | Statisk tabel med postnumre og deres midtpunkt i `packages/shared` | 3 |
-| 3 | Både `users` og `groups` har postnummer | **Besluttet 14. november 2026:** kun på gruppen | 1 |
-| 4 | `groups.invite_code` udløber aldrig, men invitationer skal udløbe efter 7 dage | **Besluttet 14. november 2026:** koden ligger i `invites` med `expires_at`, ikke på gruppen | 1 |
-| 5 | Auth er ikke beskrevet | **Besluttet 14. november 2026:** JWT i httpOnly-cookie (ikke localStorage), adgangskoder med argon2. Nulstilling via e-mail venter på hul 6. Se ADR 0001 | 1 |
-| 6 | Ingen e-mail-udbyder valgt (invitation, nulstilling) | En med gratis niveau, fx Resend eller Brevo | 1 |
-| 7 | Hvad sker der når admin eller sidste medlem forlader gruppen | **Besluttet 14. november 2026:** næste medlem bliver admin. Går det sidste medlem, slettes gruppen | 1 |
-| 8 | Grænserne (10 medlemmer, 5 grupper, unikt navn) kan omgås af samtidige kald | **Besluttet 14. november 2026:** tjek i én transaktion med lås. Navne sammenlignes uden forskel på store og små bogstaver | 1 |
-| 9 | Hvordan ser de andre ændringer på listen | TanStack Query med `refetchInterval` (ca. 10 sek). Ingen websockets i version 1 | 2 |
-| 10 | Afkrydsning ved en fejl kan ikke fortrydes | "Fortryd" i et par sekunder efter afkrydsning | 2 |
-| 11 | `pg_dump` på samme droplet er ikke en rigtig backup | Kopiér også dumpet væk fra serveren (DigitalOcean Spaces eller egen maskine) | 2 |
-| 12 | Tidszone for cron-jobs | UTC eller `Europe/Copenhagen`. Dansk tid passer bedst til butikkernes uger. **Din beslutning** | 3 |
-| 13 | Testopsætning ikke valgt | Vitest. PGlite indtil Docker er sat op, derefter rigtig Postgres i Docker | 0 |
-| 14 | pg_trgm-indeks bliver ikke brugt til `%` uden den rigtige operatorklasse | `GIN (name_normalized gin_trgm_ops)` | 3 |
-| 15 | 1 GB RAM til Postgres, API og Caddy ved siden af det der kører i dag | Mål forbruget ved første deploy i fase 2 | 2 |
-| 16 | Ingen licens i et offentligt repo betyder "alle rettigheder forbeholdt" | **Besluttet 2. november 2026:** ingen licens. Se afsnit 2 | 0 |
-| 17 | Git-mailen i commits er offentlig | Brug GitHubs noreply-adresse i dette repo før første commit | 0 |
+| 1 | Tjek `/offers/search` requires a search term, so the nightly job cannot fetch all offers for an area. The API is not official | Find an endpoint that lists offers for an area. Read their terms | 3 |
+| 2 | Tjek needs lat/lng, the group has a postal code | Static table of postal codes and their centre in `packages/shared` | 3 |
+| 3 | Both `users` and `groups` have a postal code | **Decided 14 November 2026:** only on the group | 1 |
+| 4 | `groups.invite_code` never expires, but invitations must expire after 7 days | **Decided 14 November 2026:** the code lives in `invites` with `expires_at`, not on the group | 1 |
+| 5 | Auth is not described | **Decided 14 November 2026:** JWT in an httpOnly cookie (not localStorage), passwords with argon2. Password reset by email waits for hole 6. See ADR 0001 | 1 |
+| 6 | No email provider chosen (invitation, password reset) | One with a free tier, e.g. Resend or Brevo | 1 |
+| 7 | What happens when the admin or the last member leaves the group | **Decided 14 November 2026:** the next member becomes admin. If the last member leaves, the group is deleted | 1 |
+| 8 | The limits (10 members, 5 groups, unique name) can be bypassed by concurrent requests | **Decided 14 November 2026:** check in one transaction with a lock. Names are compared case-insensitively | 1 |
+| 9 | How do others see changes to the list | TanStack Query with `refetchInterval` (about 10 s). No websockets in version 1 | 2 |
+| 10 | Checking off by mistake cannot be undone | "Undo" for a few seconds after checking off | 2 |
+| 11 | `pg_dump` on the same droplet is not a real backup | Also copy the dump off the server (DigitalOcean Spaces or my own machine) | 2 |
+| 12 | Time zone for cron jobs | UTC or `Europe/Copenhagen`. Danish time fits the stores' weeks best. **My decision** | 3 |
+| 13 | Test setup not chosen | **Decided 14 November 2026:** Vitest. PGlite until Docker is set up, then real Postgres in Docker | 0 |
+| 14 | A pg_trgm index is not used for `%` without the right operator class | `GIN (name_normalized gin_trgm_ops)` | 3 |
+| 15 | 1 GB RAM for Postgres, API and Caddy next to what runs today | Measure usage at the first deploy in phase 2 | 2 |
+| 16 | No license in a public repo means "all rights reserved" | **Decided 2 November 2026:** no license. See section 2 | 0 |
+| 17 | The git email in commits is public | Use GitHub's noreply address in this repo before the first commit | 0 |
 
-## 10. Huskeliste
+## 10. Notes for later
 
-Oprettet 3. november 2026. Ting der skal med, men ikke er planlagt i en fase endnu. Når et punkt er besluttet, flyttes det ind i det afsnit det hører til.
+Created 3 November 2026. Things that must be included, but are not planned in a phase yet. When a point is decided, it moves into the section it belongs to.
 
-### Butikker med flest tilbud
+### Stores with the most offers
 
-- Filtrer og sorter butikker efter hvor mange varer fra listen, der er på tilbud
-- Fx "Netto: 7 af 12 varer på tilbud", "Føtex: 4 af 12"
-- Butikken med flest tilbud vises øverst
+- Filter and sort stores by how many items from the list are on offer
+- E.g. "Netto: 7 of 12 items on offer", "Føtex: 4 of 12"
+- The store with the most offers is shown at the top
 
-### Samlet pris pr. butik
+### Total price per store
 
-- Vis samlet total, hvis man køber hele listen i én butik
-- Fx "Alt i Netto: 214 kr.", "Alt i Rema: 238 kr."
-- Vis også den billigste blanding af butikker, og hvor meget man sparer
-- Koden regner totalerne, ikke AI'en
+- Show the total if you buy the whole list in one store
+- E.g. "All in Netto: 214 kr.", "All in Rema: 238 kr."
+- Also show the cheapest mix of stores, and how much you save
+- The code calculates the totals, not the AI
 
-### Normalpriser (ikke kun tilbud)
+### Normal prices (not only offers)
 
-- Hent også almindelige priser, fx banan, selvom den ikke er på tilbud
-- Så bliver totalen pr. butik rigtig, også for varer uden tilbud
-- Åbent: find en kilde. Tjek-API'et har kun tilbud. Skal undersøges (webshops som Bilka ToGo, Nemlig, Rema-appen, eller Tilbudsdata)
+- Also fetch regular prices, e.g. bananas, even when they are not on offer
+- Then the total per store is correct, also for items without an offer
+- Open: find a source. The Tjek API only has offers. To be investigated (web shops like Bilka ToGo, Nemlig, the Rema app, or Tilbudsdata)
 
-### Historik
+### History
 
-- Prishistorik: hvad har varen kostet før, og er tilbuddet reelt billigt
-- Købshistorik: hvad har gruppen købt, hvornår og hvor
-- Åbent: hvilken af dem er vigtigst, eller begge?
+- Price history: what has the item cost before, and is the offer really cheap
+- Purchase history: what has the group bought, when and where
+- Open: which of them matters most, or both?
 
 ## 11. Status
 
-Opdateret 14. november 2026. Nuværende fase: **0. Fundament** (i gang).
+Updated 15 November 2026. Current phase: **1. Auth and groups** (backend done, frontend not started).
 
-Færdigt:
+Done in phase 0:
 
-- Monorepo, API (Fastify, `/health`) og web (Vite, React, TanStack Query)
-- CI med `check` og `gitleaks`, `concurrency` og timeouts. Kører ikke dobbelt på PR-branches
-- Ruleset på `main`: kræver PR, kun squash-merge, blokerer force-push og sletning, kræver `check` og `gitleaks`
-- gitleaks som pre-commit hook (`.githooks`). Secret scanning og push protection er slået til
-- Dependabot hver uge for npm og Actions. Ignorerer major-versioner af `@types/node`. Alle åbne opdateringer er merged
-- PR-skabelon og PR-regler (`.github/pull_request_template.md`, `.claude/rules/git.md`)
-- Kørt lokalt på `main`: `typecheck`, 5 tests, `build` og `pnpm audit` uden fejl
+- Monorepo, API (Fastify, `/health`) and web (Vite, React, TanStack Query)
+- CI with `check` and `gitleaks`, `concurrency` and timeouts
+- Ruleset on `main`: requires a PR, squash-merge only, blocks force-push and deletion, requires `check` and `gitleaks`
+- gitleaks as a pre-commit hook (`.githooks`). Secret scanning and push protection are on
+- Dependabot every week for npm and Actions
+- PR template and PR rules (`.github/pull_request_template.md`)
+- Drizzle and a local database (PGlite). `/api/health` checks the database
 
-Mangler i fase 0:
+Done in the backend (phases 1 and 2):
 
-- Slå Dependabot security updates til i GitHub (står som `disabled`)
-- Drizzle og forbindelse fra API'et til en lokal database (PGlite, PR #23)
+- Signup, login, logout and "me" with an httpOnly cookie (ADR 0001)
+- Create and list groups, invitation link and join, leave a group with admin hand-over
+- Shopping list: list, add, edit, check off and undo
+- 46 API tests, all green
 
-Flyttet til fase 2 (besluttet 14. november 2026: vi bygger appen først og deployer, før familien skal bruge den):
+Next:
 
-- Dockerfiles, Caddy, droplet og deploy-workflow (`deploy.yml`). En utestet Dockerfile til API'et ligger på branchen `feat/api-dockerfile`
-- `docker-compose.yml` med Postgres og Vitest mod rigtig Postgres (hul 13)
-- Backup væk fra serveren (hul 11) og RAM-måling (hul 15)
+1. Backend: list members, edit group name and postal code, remove a member (admin), edit profile
+2. Frontend: signup and login, groups and invitation, shopping list
+3. Offer search (phase 3), when hole 1 is solved
+
+Still open in phase 0:
+
+- Turn on Dependabot alerts and security updates in GitHub
+
+Moved to phase 2 (decided 14 November 2026: we build the app first and deploy before the family needs it):
+
+- Dockerfiles, Caddy, droplet and deploy workflow (`deploy.yml`). An untested API Dockerfile is on the branch `feat/api-dockerfile`
+- `docker-compose.yml` with Postgres and Vitest against real Postgres (hole 13)
+- Backup off the server (hole 11) and RAM measurement (hole 15)
+- Rate limiting on login and signup, node-postgres instead of PGlite, the Dockerfile must copy `apps/api/drizzle`
