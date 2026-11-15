@@ -12,6 +12,7 @@ export async function createTestApp() {
   const app = buildApp(await createTestDb(), testConfig);
   const inject = app.inject.bind(app);
   // The CSRF guard refuses writes without an Origin (ADR 0001), so tests send the app's own unless they set one.
+  // Only the options-object form of inject is supported.
   app.inject = ((opts: InjectOptions) =>
     inject({ ...opts, headers: { origin: testConfig.APP_ORIGIN, ...opts.headers } })) as typeof app.inject;
   return app;
