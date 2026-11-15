@@ -43,3 +43,8 @@ export const memberResponseSchema = z.object({
 export type MemberResponse = z.infer<typeof memberResponseSchema>;
 
 export const memberParamsSchema = z.object({ groupId: z.uuid(), userId: z.uuid() });
+
+// Admins can change either field. At least one must be sent.
+export const updateGroupBodySchema = createGroupBodySchema.partial().refine((b) => Object.keys(b).length > 0);
+
+export type UpdateGroupBody = z.input<typeof updateGroupBodySchema>;
