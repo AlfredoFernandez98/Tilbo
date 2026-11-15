@@ -9,6 +9,7 @@ Tilbo is a shared shopping list and offer search. It starts as an app for my fam
 ### Users and groups
 
 - Every user has their own profile: name, email, password
+- A user can change their name. Changing email or password waits for email verification (gap 6). Decided 15 November 2026
 - A group has 1-10 members. Invitations stop when the group is full
 - A user can be in at most 5 groups
 - Groups are fully closed: if you are in group 1, you cannot see anything from group 2 (lists, notes, searches, members, feed)

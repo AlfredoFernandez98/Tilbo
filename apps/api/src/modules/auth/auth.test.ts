@@ -75,6 +75,30 @@ describe("auth", () => {
     expect(forged.statusCode).toBe(401);
   });
 
+  it("updates the user's own name and trims it", async () => {
+    const cookies = { [AUTH_COOKIE]: sessionCookie(await signup())!.value };
+    const res = await app.inject({ method: "PATCH", url: "/api/auth/me", cookies, payload: { name: "  Anna B  " } });
+
+    expect(res.statusCode).toBe(200);
+    expect(userResponseSchema.parse(res.json())).toMatchObject({ name: "Anna B", email: "anna@example.com" });
+    expect((await app.inject({ method: "GET", url: "/api/auth/me", cookies })).json().name).toBe("Anna B");
+  });
+
+  it("rejects an empty name and ignores other fields like email", async () => {
+    const cookies = { [AUTH_COOKIE]: sessionCookie(await signup())!.value };
+    const patch = (payload: object) => app.inject({ method: "PATCH", url: "/api/auth/me", cookies, payload });
+
+    expect((await patch({ name: " " })).statusCode).toBe(400);
+    expect((await patch({ email: "eve@example.com" })).statusCode).toBe(400);
+    const res = await patch({ name: "Anna", email: "eve@example.com" });
+    expect(res.json().email).toBe("anna@example.com");
+  });
+
+  it("requires login to update the profile", async () => {
+    const res = await app.inject({ method: "PATCH", url: "/api/auth/me", payload: { name: "Eve" } });
+    expect(res.statusCode).toBe(401);
+  });
+
   it("clears the cookie on logout", async () => {
     const res = await app.inject({ method: "POST", url: "/api/auth/logout" });
     expect(res.statusCode).toBe(204);

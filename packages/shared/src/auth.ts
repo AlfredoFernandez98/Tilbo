@@ -23,3 +23,8 @@ export const userResponseSchema = z.object({
 export type SignupBody = z.infer<typeof signupBodySchema>;
 export type LoginBody = z.infer<typeof loginBodySchema>;
 export type UserResponse = z.infer<typeof userResponseSchema>;
+
+// Only the name for now. Changing email or password needs email verification (gap 6).
+export const updateProfileBodySchema = signupBodySchema.pick({ name: true });
+
+export type UpdateProfileBody = z.input<typeof updateProfileBodySchema>;
