@@ -20,6 +20,7 @@ Tilbo is a shared shopping list and offer search. It starts as an app for my fam
 - A user cannot be in two groups with the same name. Other users may have a group with the same name, since groups cannot see each other
 - Every group has a unique technical id
 - Every group has one postal code, which decides which stores and offers the group sees
+- An admin can change the group's name and postal code. The new name must not clash with another group of any member. Decided 15 November 2026
 - Invitation via a shared link that several people can use, expires after 7 days. Email comes later (gap 6)
 - An admin can remove other members. This revokes the group's invite links, so the removed member cannot rejoin with an old link. Decided 15 November 2026
 - The word "Gruppe" is used in the UI for now. It lives in one place in the code, so it can be changed (e.g. to "Kurv")

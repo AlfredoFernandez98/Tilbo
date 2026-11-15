@@ -57,9 +57,15 @@ export async function invitesRoutes(app: FastifyInstance) {
 
       // Locks the user row first, then the group row: always this order, so no deadlocks.
       await assertUserCanJoin(tx, userId, group.name);
-      const [locked] = await tx.select({ id: groups.id }).from(groups).where(eq(groups.id, group.id)).for("update");
+      const [locked] = await tx
+        .select({ name: groups.name, postalCode: groups.postalCode })
+        .from(groups)
+        .where(eq(groups.id, group.id))
+        .for("update");
       // The group may have been deleted (last member left) between the read and the lock.
       if (!locked) throw new HttpError(404, "invite_not_found");
+      // Or renamed: check the name rule again against the name we now hold the lock on.
+      if (locked.name !== group.name) await assertUserCanJoin(tx, userId, locked.name);
 
       const [{ value: members } = { value: 0 }] = await tx
         .select({ value: count() })
@@ -68,7 +74,7 @@ export async function invitesRoutes(app: FastifyInstance) {
       if (members >= GROUP_LIMITS.maxMembers) throw new HttpError(409, "group_full");
 
       await tx.insert(groupMembers).values({ groupId: group.id, userId, role: "member" });
-      return { id: group.id, name: group.name, postalCode: group.postalCode, role: "member", memberCount: members + 1 };
+      return { id: group.id, ...locked, role: "member", memberCount: members + 1 };
     });
   });
 }
