@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
-import { and, asc, eq, sql } from "drizzle-orm";
-import { createGroupBodySchema, groupIdParamsSchema, type GroupResponse } from "@tilbo/shared";
-import { groupMembers, groups, shoppingLists } from "../../db/schema.ts";
+import { and, asc, eq, inArray, ne, sql } from "drizzle-orm";
+import { createGroupBodySchema, groupIdParamsSchema, updateGroupBodySchema, type GroupResponse } from "@tilbo/shared";
+import { groupMembers, groups, shoppingLists, users } from "../../db/schema.ts";
 import { HttpError } from "../../lib/http-error.ts";
 import { parse } from "../../lib/validate.ts";
 import { assertUserCanJoin, getRole } from "./membership.ts";
@@ -51,6 +51,43 @@ export async function groupsRoutes(app: FastifyInstance) {
       .innerJoin(mine, eq(mine.groupId, groups.id))
       // Case-insensitive, so "anna" and "Zoo" sort as people expect.
       .orderBy(sql`lower(${groups.name})`);
+  });
+
+  // Admin only. A new name must not clash with another group any member is in (the rule is per user).
+  app.patch("/api/groups/:groupId", async (req): Promise<GroupResponse> => {
+    const { groupId } = parse(groupIdParamsSchema, req.params);
+    const body = parse(updateGroupBodySchema, req.body);
+
+    return app.db.transaction(async (tx) => {
+      // Lock order user before group, as in assertUserCanJoin, so a member cannot join a same-named group meanwhile.
+      // shortcut: someone joining this group during the rename is not locked here; tiny window, fine for families.
+      const memberIds = tx.select({ id: groupMembers.userId }).from(groupMembers).where(eq(groupMembers.groupId, groupId));
+      await tx.select({ id: users.id }).from(users).where(inArray(users.id, memberIds)).for("update");
+      const [locked] = await tx.select({ id: groups.id }).from(groups).where(eq(groups.id, groupId)).for("update");
+      const role = locked && (await getRole(tx, groupId, req.user.sub));
+      if (!role) throw new HttpError(404, "group_not_found");
+      if (role !== "admin") throw new HttpError(403, "admin_only");
+
+      if (body.name !== undefined) {
+        const [clash] = await tx
+          .select({ id: groups.id })
+          .from(groups)
+          .innerJoin(groupMembers, eq(groupMembers.groupId, groups.id))
+          .where(
+            and(
+              inArray(groupMembers.userId, memberIds),
+              ne(groups.id, groupId),
+              sql`lower(${groups.name}) = lower(${body.name})`,
+            ),
+          )
+          .limit(1);
+        if (clash) throw new HttpError(409, "group_name_taken");
+      }
+
+      const [updated] = await tx.update(groups).set(body).where(eq(groups.id, groupId)).returning();
+      const memberCount = await tx.$count(groupMembers, eq(groupMembers.groupId, groupId));
+      return { id: updated!.id, name: updated!.name, postalCode: updated!.postalCode, role, memberCount };
+    });
   });
 
   // Hole 7: if the last admin leaves, the longest-standing member becomes admin.
