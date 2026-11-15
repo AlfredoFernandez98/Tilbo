@@ -1,4 +1,4 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, InjectOptions } from "fastify";
 import { buildApp } from "./app.ts";
 import { loadConfig } from "./config.ts";
 import { createTestDb } from "./db/client.ts";
@@ -9,7 +9,13 @@ export const testConfig = loadConfig({ NODE_ENV: "test", JWT_SECRET: "test".repe
 
 // A fresh app with its own migrated in-memory database. Call app.close() when done.
 export async function createTestApp() {
-  return buildApp(await createTestDb(), testConfig);
+  const app = buildApp(await createTestDb(), testConfig);
+  const inject = app.inject.bind(app);
+  // The CSRF guard refuses writes without an Origin (ADR 0001), so tests send the app's own unless they set one.
+  // Only the options-object form of inject is supported.
+  app.inject = ((opts: InjectOptions) =>
+    inject({ ...opts, headers: { origin: testConfig.APP_ORIGIN, ...opts.headers } })) as typeof app.inject;
+  return app;
 }
 
 // Signs up a user and returns the cookies to send as that user.

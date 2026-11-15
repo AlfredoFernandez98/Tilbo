@@ -134,6 +134,22 @@ describe("auth", () => {
     expect(own.statusCode).toBe(201);
   });
 
+  it("refuses writes without an Origin header but allows reads", async () => {
+    // Built directly: createTestApp() adds the app's own Origin to every request.
+    const bare = buildApp(await createTestDb(), testConfig);
+    const write = await bare.inject({
+      method: "POST",
+      url: "/api/auth/signup",
+      payload: { name: "Anna", email: "anna@example.com", password: "correct horse" },
+    });
+    expect(write.statusCode).toBe(403);
+    expect(write.json()).toEqual({ error: "forbidden_origin" });
+
+    const read = await bare.inject({ method: "GET", url: "/api/health" });
+    expect(read.statusCode).toBe(200);
+    await bare.close();
+  });
+
   it("hides database errors: 500 with no SQL, email or hash in the reply", async () => {
     // A failed query carries the SQL and its params (email, password hash) in its message.
     await app.db.execute(sql`drop table users cascade`);
@@ -155,6 +171,7 @@ describe("auth", () => {
     const res = await prod.inject({
       method: "POST",
       url: "/api/auth/signup",
+      headers: { origin: testConfig.APP_ORIGIN },
       payload: { name: "Anna", email: "anna@example.com", password: "correct horse" },
     });
     expect(sessionCookie(res)?.secure).toBe(true);

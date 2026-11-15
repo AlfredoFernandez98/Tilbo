@@ -54,10 +54,10 @@ export function buildApp(db: Db, config: Config, opts: FastifyServerOptions = {}
     return reply.code(status).send({ error: err.message });
   });
 
-  // CSRF guard (ADR 0001): browsers always send Origin on cross-site writes, so a foreign Origin is refused.
+  // CSRF guard (ADR 0001): writes must carry the app's own Origin. Browsers always send it on non-GET requests,
+  // so refusing a missing Origin only affects non-browser clients.
   app.addHook("onRequest", async (req, reply) => {
-    const origin = req.headers.origin;
-    if (!SAFE_METHODS.has(req.method) && origin !== undefined && origin !== config.APP_ORIGIN) {
+    if (!SAFE_METHODS.has(req.method) && req.headers.origin !== config.APP_ORIGIN) {
       return reply.code(403).send({ error: "forbidden_origin" });
     }
   });
