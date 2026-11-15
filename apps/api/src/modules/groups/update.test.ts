@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
+import { eq } from "drizzle-orm";
 import { groupResponseSchema } from "@tilbo/shared";
+import { groups } from "../../db/schema.ts";
 import { createTestApp, signupAs } from "../../test-utils.ts";
 
 type Cookies = Record<string, string>;
@@ -67,8 +69,27 @@ describe("update group", () => {
     expect(res.json()).toEqual({ error: "group_name_taken" });
   });
 
+  it("allows a name that only a non-member uses", async () => {
+    const eve = await signupAs(app, "eve@example.com");
+    await createGroup(eve, "Work");
+    const res = await update(anna, { name: "Work" });
+
+    expect(res.statusCode).toBe(200);
+  });
+
+  it("ignores fields the client may not change", async () => {
+    const ben = await join("ben@example.com");
+    const benId = (await app.inject({ method: "GET", url: "/api/auth/me", cookies: ben })).json().id;
+    await update(anna, { name: "Summer house", createdBy: benId, id: benId });
+
+    const [row] = await app.db.select().from(groups).where(eq(groups.id, groupId));
+    expect(row).toMatchObject({ id: groupId, name: "Summer house" });
+    expect(row!.createdBy).not.toBe(benId);
+  });
+
   it("rejects an empty body and a bad postal code", async () => {
     expect((await update(anna, {})).statusCode).toBe(400);
+    expect((await update(anna, { foo: 1 })).statusCode).toBe(400);
     expect((await update(anna, { postalCode: "12" })).statusCode).toBe(400);
     expect((await update(anna, { name: " " })).statusCode).toBe(400);
   });

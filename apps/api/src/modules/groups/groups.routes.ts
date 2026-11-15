@@ -62,7 +62,8 @@ export async function groupsRoutes(app: FastifyInstance) {
       // Lock order user before group, as in assertUserCanJoin, so a member cannot join a same-named group meanwhile.
       // shortcut: someone joining this group during the rename is not locked here; tiny window, fine for families.
       const memberIds = tx.select({ id: groupMembers.userId }).from(groupMembers).where(eq(groupMembers.groupId, groupId));
-      await tx.select({ id: users.id }).from(users).where(inArray(users.id, memberIds)).for("update");
+      // Sorted by id, so two renames sharing members always lock them in the same order (no deadlock).
+      await tx.select({ id: users.id }).from(users).where(inArray(users.id, memberIds)).orderBy(users.id).for("update");
       const [locked] = await tx.select({ id: groups.id }).from(groups).where(eq(groups.id, groupId)).for("update");
       const role = locked && (await getRole(tx, groupId, req.user.sub));
       if (!role) throw new HttpError(404, "group_not_found");
