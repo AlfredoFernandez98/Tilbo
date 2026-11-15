@@ -31,3 +31,15 @@ export const inviteResponseSchema = z.object({
 export type InviteResponse = z.infer<typeof inviteResponseSchema>;
 
 export const acceptInviteBodySchema = z.object({ token: z.string().min(1).max(100) });
+
+// Only what other members need to see. Emails stay private.
+export const memberResponseSchema = z.object({
+  userId: z.uuid(),
+  name: z.string(),
+  role: z.enum(["admin", "member"]),
+  joinedAt: z.iso.datetime(),
+});
+
+export type MemberResponse = z.infer<typeof memberResponseSchema>;
+
+export const memberParamsSchema = z.object({ groupId: z.uuid(), userId: z.uuid() });
